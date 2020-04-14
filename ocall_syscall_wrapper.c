@@ -8,12 +8,14 @@
 
 //default: musl-libc/include
 #include "sys/uio.h" 
-#include "bits/ioctl.h"
+//#include "bits/ioctl.h"
+#include "sys/ioctl.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "time.h"
 #include "string.h"
-#include "bits/syscall.h" //define all the syscall number
+//#include "bits/syscall.h" //define all the syscall number
+#include "sys/syscall.h"
 #include "sys/stat.h"
 #include "string.h"
 #include "errno.h"

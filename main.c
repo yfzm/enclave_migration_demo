@@ -1,13 +1,13 @@
 //musl-libc
-#include "stdio.h"
-#include "stdlib.h"
-#include "signal.h"
-#include "sys/stat.h"
-#include "errno.h"
-#include "syscall.h"
-#include "time.h"
-#include "unistd.h"
-#include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <syscall.h>
+#include <time.h>
+#include <unistd.h>
+#include <string.h>
 
 //$(pwd)/include
 #include "vars.h"

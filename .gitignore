@@ -1,4 +1,14 @@
 .vscode/
 
 *.o
+*.x
+*.txt
+*.tmp
+tmp*
+*.log
+*_x86_64
+*_aarch64
+
+x86_64/
+aarch64/
 
