@@ -3,7 +3,7 @@ CC      := $(POPCORN)/bin/clang
 #CFLAGS := -static -fPIC -nodefaultlibs -nostdlib -I./include -Wall -g
 CFLAGS := -O0 -mllvm -optimize-regalloc -Wall -g -popcorn-alignment \
 	      -Wno-unused-variable -D_GNU_SOURCE -mllvm -no-sm-warn \
-		  -I./include -static
+		  -I./include -static -fPIC
 lds := linker.lds
 
 LIB_HDR := $(shell ls include/*.h)

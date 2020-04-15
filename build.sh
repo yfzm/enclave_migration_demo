@@ -54,17 +54,18 @@ build() {
 
     # Generate map.txt
     $popcorn_bin/ld.gold -L/usr/lib/gcc/x86_64-linux-gnu/5 -Map map_x86_64.txt \
-            -T linker.lds \
+            -T x86_64/linker.lds \
             ${APP}_x86_64.o -o ${APP}_x86_64 \
             $x86_objs \
             --start-group -lgcc -lgcc_eh --end-group
 
     $popcorn_bin/ld.gold -L/usr/lib/gcc-cross/aarch64-linux-gnu/5 -Map map_aarch64.txt \
-            -T linker.lds \
+            -T aarch64/linker.lds \
             ${APP}_aarch64.o -o ${APP}_aarch64 \
             $arm_objs \
             --start-group -lgcc -lgcc_eh --end-group
 
+    exit 1
     # Generate aligned linker script
     $popcorn_bin/pyalign --compiler-inst $popcorn_path \
             --arm-bin ${APP}_aarch64 --arm-map map_aarch64.txt \

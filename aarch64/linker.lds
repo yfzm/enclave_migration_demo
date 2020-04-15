@@ -7,9 +7,9 @@ TCS_SSA = 0x30;
 start_addr = 0x40000000;
 	
 /* Script for -z combreloc: combine and sort reloc sections */
-OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64",
-	      "elf64-x86-64")
-OUTPUT_ARCH(i386:x86-64)
+OUTPUT_FORMAT("elf64-littleaarch64", "elf64-bigaarch64",
+	      "elf64-littleaarch64")
+OUTPUT_ARCH(aarch64)
 /* ENTRY(_start) */
 
 /* constants */                      
@@ -91,12 +91,12 @@ SECTIONS
     }
   .init           :
   {
-    KEEP (*(SORT_NONE(.init)))
+    /*KEEP (*(SORT_NONE(.init)))*/
   }
   .plt            : { *(.plt) *(.iplt) }
     .fini           :
   {
-    KEEP (*(SORT_NONE(.fini)))
+    /*KEEP (*(SORT_NONE(.fini)))*/
   }
   PROVIDE (__etext = .);
   PROVIDE (_etext = .);

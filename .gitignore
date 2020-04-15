@@ -9,4 +9,4 @@ tmp*
 *.log
 *_x86_64
 *_aarch64
-
+asm
