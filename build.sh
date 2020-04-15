@@ -17,14 +17,14 @@ x86_objs="
     $popcorn_path/x86_64/lib/libelf.a
     $popcorn_path/x86_64/lib/libc.a
     $popcorn_path/x86_64/lib/libpthread.a
-    x86_64/init.o
-    x86_64/enclave_tls.o
-    x86_64/ocall_libcall_wrapper.o
-    x86_64/ocall_syscall_wrapper.o
-    x86_64/stub.o
-    x86_64/ocall_syscall.o
-    x86_64/migration.o
-    x86_64/trampo.o
+    build/x86_64/init.o
+    build/x86_64/enclave_tls.o
+    build/x86_64/ocall_libcall_wrapper.o
+    build/x86_64/ocall_syscall_wrapper.o
+    build/x86_64/stub.o
+    build/x86_64/ocall_syscall.o
+    build/x86_64/migration.o
+    build/x86_64/trampo.o
 "
 
 arm_objs="
@@ -35,14 +35,14 @@ arm_objs="
     $popcorn_path/aarch64/lib/libelf.a
     $popcorn_path/aarch64/lib/libc.a
     $popcorn_path/aarch64/lib/libpthread.a
-    aarch64/init.o
-    aarch64/enclave_tls.o
-    aarch64/ocall_libcall_wrapper.o
-    aarch64/ocall_syscall_wrapper.o
-    aarch64/stub.o
-    aarch64/ocall_syscall.o
-    aarch64/migration.o
-    aarch64/trampo.o
+    build/aarch64/init.o
+    build/aarch64/enclave_tls.o
+    build/aarch64/ocall_libcall_wrapper.o
+    build/aarch64/ocall_syscall_wrapper.o
+    build/aarch64/stub.o
+    build/aarch64/ocall_syscall.o
+    build/aarch64/migration.o
+    build/aarch64/trampo.o
 "
 
 build() {
@@ -54,11 +54,13 @@ build() {
 
     # Generate map.txt
     $popcorn_bin/ld.gold -L/usr/lib/gcc/x86_64-linux-gnu/5 -Map map_x86_64.txt \
+            -T linker.lds \
             ${APP}_x86_64.o -o ${APP}_x86_64 \
             $x86_objs \
             --start-group -lgcc -lgcc_eh --end-group
 
     $popcorn_bin/ld.gold -L/usr/lib/gcc-cross/aarch64-linux-gnu/5 -Map map_aarch64.txt \
+            -T linker.lds \
             ${APP}_aarch64.o -o ${APP}_aarch64 \
             $arm_objs \
             --start-group -lgcc -lgcc_eh --end-group

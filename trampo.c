@@ -1,7 +1,7 @@
 #include "function_table.h"
 
 //musl-libc
-#include "stdio.h"
+#include <stdio.h>
 #include "stdlib.h"
 #include "signal.h"
 #include "sys/stat.h"

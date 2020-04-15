@@ -15,13 +15,19 @@
 
 int main(int argc, char* argv[])
 {
+#if 0
 	int msg_cnt;
-
 	msg_cnt = 0;
 	while(1)
 	{
 		printf("This is the No.%d message from the app\n", ++msg_cnt);
 		sleep(1);
 	}
+#else
+    int a = 1;
+    printf("a=%d\n", a);
+    migrate(1, 0, 0);
+    printf("a+1=%d\n", a+1);
+#endif
 	return 0;
 }

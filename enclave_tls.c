@@ -7,7 +7,7 @@ static inline struct enclave_tls *__tls_self()
 #ifdef __x86_64
 	__asm__ __volatile__("mov %%fs:0, %0" : "=r" (self));
 #else
-	__asm__ __volatile__("msr %0, tpidr_el0" : "=r"(self));
+	__asm__ __volatile__("mrs %0, tpidr_el0" : "=r"(self));
 #endif
 	return self;                                          
 }                                                         

@@ -8,14 +8,14 @@
 
 //default: musl-libc/include
 #include "sys/uio.h" 
-//#include "bits/ioctl.h"
-#include "sys/ioctl.h"
+#include "bits/ioctl.h"
+//#include "sys/ioctl.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "time.h"
 #include "string.h"
-//#include "bits/syscall.h" //define all the syscall number
-#include "sys/syscall.h"
+#include "bits/syscall.h" //define all the syscall number
+//#include "sys/syscall.h"
 #include "sys/stat.h"
 #include "string.h"
 #include "errno.h"
@@ -132,14 +132,16 @@ long ocall_syscall1(long n, long a1)
 	*(ptr+1) = n;
 	*(ptr+2) = a1;
 
+#ifdef SYS_pipe
 	if(n == SYS_pipe) //22
 	{
 		ptr_out = (void*)outside_buffer + 0x1000;
 		*(ptr+2) = (unsigned long)ptr_out;
 		memcpy(ptr_out, (void*)a1, sizeof(int)*2);
 	}
+#endif
 
-	if(n == 218) //set_tid_address
+	if(n == SYS_set_tid_address) //set_tid_address
 	{
 		ptr_out = (void*)outside_buffer + 0x1000;
 		*(ptr+2) = (unsigned long)ptr_out;
@@ -147,13 +149,15 @@ long ocall_syscall1(long n, long a1)
 
 	ocall_syscall();
 
+#ifdef SYS_pipe
 	if(n == SYS_pipe) //22
 	{
 		ptr_out = (void*)outside_buffer + 0x1000;
 		memcpy((void*)a1, ptr_out, sizeof(int)*2);
 	}
+#endif
 
-	if(n == 218)
+	if(n == SYS_set_tid_address)
 	{
 		memcpy((void*)a1, ptr_out, 8);
 	}
@@ -199,24 +203,25 @@ long ocall_syscall2(long n, long a1, long a2)
 		*(ptr+3) = (unsigned long)ptr_out;
 	}
 
-	if(n == SYS_arch_prctl) //158
-	{
-		ocall_debug(0xdeadbeef);
-		// asm("rdtsc");
-		/*
-		if(a1 == ARCH_GET_FS)
-		{
-			*(unsigned long*)a2 = (unsigned long)pthread_self();
-			return 0;
-		}
-		else //a1 == ARCH_GET_GS ARCH_SET_FS or ARCH_SET_GS
-		{
-			ocall_debug(0xdeadbeef);
-			asm("rdtsc");
-		}
-		*/
-	}
+//	if(n == SYS_arch_prctl) //158
+//	{
+//		ocall_debug(0xdeadbeef);
+//		// asm("rdtsc");
+//		/*
+//		if(a1 == ARCH_GET_FS)
+//		{
+//			*(unsigned long*)a2 = (unsigned long)pthread_self();
+//			return 0;
+//		}
+//		else //a1 == ARCH_GET_GS ARCH_SET_FS or ARCH_SET_GS
+//		{
+//			ocall_debug(0xdeadbeef);
+//			asm("rdtsc");
+//		}
+//		*/
+//	}
 
+#ifdef SYS_stat
 	if(n == SYS_stat) // 4
 	{
 		len = strlen((char*)a1) + 1;
@@ -229,6 +234,7 @@ long ocall_syscall2(long n, long a1, long a2)
 		ptr_out = (char*)outside_buffer + 0x1000 + len;
 		*(ptr+3) = (unsigned long)ptr_out;
 	}
+#endif
 
 	if(n == SYS_fstat)
 	{
@@ -248,6 +254,7 @@ long ocall_syscall2(long n, long a1, long a2)
 		}
 	}
 
+#ifdef SYS_stat
 	if(n == SYS_stat)
 	{
 		ptr_in = (char*)a2;
@@ -255,6 +262,7 @@ long ocall_syscall2(long n, long a1, long a2)
 
 		memcpy(ptr_in, ptr_out, sizeof(struct stat));
 	}
+#endif
 
 	if(n == SYS_fstat)
 	{
@@ -423,6 +431,7 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 		}
 	}
 
+#ifdef SYS_open
 	if(n == SYS_open) // 2
 	{
 		ptr_in = (char*)a1;
@@ -432,6 +441,7 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 		i = strlen(ptr_in) + 1; // include the str ending '\0'
 		memcpy(ptr_out, ptr_in, i);
 	}
+#endif
 
 	if(n == 16) // ioctl
 	{

@@ -9,10 +9,12 @@
 .type ocall_syscall, @function
 
 ocall_syscall:
-#save the execution states (all the general purpose registers) in the enclave 
-msr x0, tpidr_el0               # thread pointer
-str sp, [x0, 48]                # tls: previous_stack <- sp
-ldr sp, [x0, 16]                # tls: sp <- register_frame_start
+// save the execution states (all the general purpose registers) in the enclave 
+mrs x0, tpidr_el0               // thread pointer
+mov x1, sp                      // tls: previous_stack <- sp
+str x1, [x0, 48]
+ldr x1, [x0, 16] 
+mov sp, x1                      // tls: sp <- register_frame_start
 
 stp	x0, x1, [sp, #16 * 0]
 stp	x2, x3, [sp, #16 * 1]
@@ -32,29 +34,31 @@ stp	x28, x29, [sp, #16 * 14]
 mrs	x21, sp_el0
 mrs	x22, elr_el1
 mrs	x23, spsr_el1
-stp	x30, x21, [sp, #16 * 15]    # save return address (rip)
+stp	x30, x21, [sp, #16 * 15]    // save return address (rip)
 stp	x22, x23, [sp, #16 * 16]
 
-msr x0, tpidr_el0               # thread pointer
-ldr sp, [x0, 32]                # tls: sp <- outside_stack
+mrs x0, tpidr_el0               // thread pointer
+ldr x1, [x0, 32]
+mov sp, x1                      // tls: sp <- outside_stack
 
-#[!!! exit trustzone]
+//[!!! exit trustzone]
 
-#mov %fs:32, %rsp 				#tls: mov outside_stack, %rsp
-#mov outside_tramp, %rbx
-#mov $0x4, %rax					#EEXIT
-#
-#jmp eexit_tag
-##enclu
+// mov %fs:32, %rsp 				#tls: mov outside_stack, %rsp
+// mov outside_tramp, %rbx
+// mov $0x4, %rax					#EEXIT
+// 
+// jmp eexit_tag
+// #enclu
 
 .section .text
 .global ocall_return
 .type ocall_return, @function
 
 ocall_return:
-#restore the execution states before the ocall
-msr x0, tpidr_el0               # thread pointer
-ldr sp, [x0, 24]                # tls: sp <- register_frame_end
+// restore the execution states before the ocall
+mrs x0, tpidr_el0               // thread pointer
+ldr x1, [x0, 24]
+mov sp, x1                      // tls: sp <- register_frame_end
 
 ldp	x22, x23, [sp, #16 * 16]
 ldp	x30, x21, [sp, #16 * 15] 
@@ -77,6 +81,7 @@ ldp	x24, x25, [sp, #16 * 12]
 ldp	x26, x27, [sp, #16 * 13]
 ldp	x28, x29, [sp, #16 * 14]
 
-msr x0, tpidr_el0               # thread pointer
-ldr sp, [x0, 48]                # tls: sp <- previous_stack
+mrs x0, tpidr_el0               // thread pointer
+ldr x1, [x0, 48]
+mov sp, x1                      // tls: sp <- previous_stack
 ret
