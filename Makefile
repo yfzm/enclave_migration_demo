@@ -3,7 +3,7 @@ CC      := $(POPCORN)/bin/clang
 #CFLAGS := -static -fPIC -nodefaultlibs -nostdlib -I./include -Wall -g
 CFLAGS := -O0 -mllvm -optimize-regalloc -Wall -g -popcorn-alignment \
 	      -Wno-unused-variable -D_GNU_SOURCE -mllvm -no-sm-warn \
-		  -I./include -static -fPIC
+		  -I./include -static -fPIC -nostdlib -nodefaultlibs
 lds := linker.lds
 
 LIB_HDR := $(shell ls include/*.h)
@@ -41,18 +41,8 @@ INC_X86_64    := -I$(POPCORN)/$(X86_64)/include
 # Recipes
 ###################################################################################
 
-all:
-	@$(CC) $(CFLAGS) -c stub.S
-	@$(CC) $(CFLAGS) -c init.c
-	@$(CC) $(CFLAGS) -c trampo.c
-	@$(CC) $(CFLAGS) -c main.c
-	@$(CC) $(CFLAGS) -c enclave_tls.c
-	@$(CC) $(CFLAGS) -c ocall_syscall_wrapper.c
-	@$(CC) $(CFLAGS) -c ocall_syscall.S
-	@$(CC) $(CFLAGS) -c ocall_libcall_wrapper.c
-	@$(CC) $(CFLAGS) -c migration.c
-	@ld -T $(lds) -o enclave $(enclu_objs) $(app_objs) $(init_files) $(ocall_files) $(libc_files) $(migrate_files)
-	@objdump -d enclave > enclave.asm
+all: libs
+	@./build.sh
 
 %/.dir:
 	@echo " [MK] $*"
@@ -78,6 +68,7 @@ $(BUILD_X86_64)/%.o: $(X86_64)/%.S $(LIB_HDR)
 	@$(CC_X86_64) $(CFLAGS) $(INC_X86_64) -o $@ -c $<
 
 clean:
+	./build.sh clean
 	# rm -f *.asm *.o enclave
 	rm -rf ./$(BUILD_X86_64) ./$(BUILD_AARCH64)
 

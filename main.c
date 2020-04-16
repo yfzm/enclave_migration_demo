@@ -15,7 +15,7 @@
 
 int main(int argc, char* argv[])
 {
-#if 0
+#if 1
 	int msg_cnt;
 	msg_cnt = 0;
 	while(1)
