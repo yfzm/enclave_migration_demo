@@ -2,6 +2,10 @@
 .extern init_stack
 
 // stub (entry & exit): saving and restoring register
+.section .text.enclave_start, "ax"
+.global enclave_start
+.type enclave_start, @function
+enclave_start:
 cmp x9, #INIT_SYSCALL  // init the enclave
 bne entry
 
@@ -40,6 +44,9 @@ mov x0, x9    // ??? why x9? first argument(passed by %r9): choose which functio
 mov x1, x10   // second argument(passed by %r10)
 b trampoline
 
+.section .text.entry, "ax"
+.global entry
+.type entry, @function
 entry:
 ## for ocall jump back to the enclave
 ## TODO: should check if there is a previous ocall. Each enclave should add a mark before ocall.
@@ -83,6 +90,9 @@ mov x0, x9   // first argument(passed by %r9): choose which function
 mov x1, x10  // second argument(passed by %r10)
 b trampoline
 
+.section .text.exit, "ax"
+.global exit
+.type exit, @function
 exit:
 ## restore the context
 ldp	x22, x23, [sp, #16 * 16]
@@ -113,6 +123,7 @@ mov sp, x0   // the old rsp is saved in x0, acctually EEXIT will restore RSP & R
 // mov $0x405000, %rcx
 // mov $0x4, %rax #EEXIT will not restore the RSP
 // 
+.section .text.eexit_tag, "ax"
 .global eexit_tag
 eexit_tag:
 br x2

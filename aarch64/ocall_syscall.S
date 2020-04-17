@@ -4,7 +4,7 @@
 .extern unsigned long outside_stack;
 .extern unsigned long outside_tramp;
 
-.section .text
+.section .text.ocall_syscall, "ax"
 .global ocall_syscall
 .type ocall_syscall, @function
 
@@ -47,10 +47,10 @@ mov sp, x1                      // tls: sp <- outside_stack
 // mov outside_tramp, %rbx
 // mov $0x4, %rax					#EEXIT
 // 
-// jmp eexit_tag
+b eexit_tag
 // #enclu
 
-.section .text
+.section .text.ocall_return, "ax"
 .global ocall_return
 .type ocall_return, @function
 

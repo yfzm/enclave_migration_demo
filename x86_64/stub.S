@@ -1,6 +1,10 @@
 #include "function_table.h"
 
 ## stub (entry & exit): saving and restoring register
+.section .text.enclave_start, "ax"
+.global enclave_start
+.type enclave_start, @function
+enclave_start:
 cmp $INIT_SYSCALL, %r9 # init the enclave
 jne entry
 
@@ -35,6 +39,9 @@ mov %r9, %rdi ##first argument(passed by %r9): choose which function
 mov %r10, %rsi ##second argument(passed by %r10)
 jmp trampoline
 
+.section .text.entry, "ax"
+.global entry
+.type entry, @function
 entry:
 ## for ocall jump back to the enclave
 ## TODO: should check if there is a previous ocall. Each enclave should add a mark before ocall.
@@ -74,6 +81,9 @@ mov %r9, %rdi ##first argument(passed by %r9): choose which function
 mov %r10, %rsi ##second argument(passed by %r10)
 jmp trampoline
 
+.section .text.exit, "ax"
+.global exit
+.type exit, @function
 exit:
 ## restore the context
 popfq
@@ -97,7 +107,9 @@ pop %rsp ## the old rsp is saved in rax, acctually EEXIT will restore RSP & RBP
 mov %rcx, %rbx #after eenter, rcx holds the next IP.
 mov $0x405000, %rcx
 mov $0x4, %rax #EEXIT will not restore the RSP
+jmp eexit_tag
 
+.section .text.eexit_tag, "ax"
 .global eexit_tag
 eexit_tag:
 enclu 
