@@ -15,7 +15,7 @@
 
 int main(int argc, char* argv[])
 {
-#if 1
+#if 0
 	int msg_cnt;
 	msg_cnt = 0;
 	while(1)
@@ -24,10 +24,7 @@ int main(int argc, char* argv[])
 		sleep(1);
 	}
 #else
-    int a = 1;
-    printf("a=%d\n", a);
-    migrate(1, 0, 0);
-    printf("a+1=%d\n", a+1);
+    write(1, "Hello World!\n", 13);
 #endif
 	return 0;
 }

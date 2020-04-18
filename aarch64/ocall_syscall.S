@@ -10,11 +10,11 @@
 
 ocall_syscall:
 // save the execution states (all the general purpose registers) in the enclave 
-mrs x0, tpidr_el0               // thread pointer
-mov x1, sp                      // tls: previous_stack <- sp
-str x1, [x0, 48]
-ldr x1, [x0, 16] 
-mov sp, x1                      // tls: sp <- register_frame_start
+mrs x9, tpidr_el0               // thread pointer
+mov x10, sp                     // tls: previous_stack <- sp
+str x10, [x9, 48]
+ldr x10, [x9, 16] 
+mov sp, x10                     // tls: sp <- register_frame_start
 
 stp	x0, x1, [sp, #16 * 0]
 stp	x2, x3, [sp, #16 * 1]
@@ -31,15 +31,14 @@ stp	x22, x23, [sp, #16 * 11]
 stp	x24, x25, [sp, #16 * 12]
 stp	x26, x27, [sp, #16 * 13]
 stp	x28, x29, [sp, #16 * 14]
-mrs	x21, sp_el0
-mrs	x22, elr_el1
-mrs	x23, spsr_el1
 stp	x30, x21, [sp, #16 * 15]    // save return address (rip)
-stp	x22, x23, [sp, #16 * 16]
 
-mrs x0, tpidr_el0               // thread pointer
-ldr x1, [x0, 32]
-mov sp, x1                      // tls: sp <- outside_stack
+mrs x9, tpidr_el0               // thread pointer
+ldr x10, [x9, 32]
+mov sp, x10                     // tls: sp <- outside_stack
+ldr x9, =outside_tramp
+ldr x10, [x9]
+br x10
 
 //[!!! exit trustzone]
 
@@ -56,15 +55,11 @@ b eexit_tag
 
 ocall_return:
 // restore the execution states before the ocall
-mrs x0, tpidr_el0               // thread pointer
-ldr x1, [x0, 24]
-mov sp, x1                      // tls: sp <- register_frame_end
+mrs x9, tpidr_el0               // thread pointer
+ldr x10, [x9, 16]
+mov sp, x10                     // tls: sp <- register_frame_end
 
-ldp	x22, x23, [sp, #16 * 16]
 ldp	x30, x21, [sp, #16 * 15] 
-msr	sp_el0, x21
-msr	elr_el1, x22
-msr	spsr_el1, x23
 ldp	x0, x1, [sp, #16 * 0]
 ldp	x2, x3, [sp, #16 * 1]
 ldp	x4, x5, [sp, #16 * 2]
@@ -81,7 +76,7 @@ ldp	x24, x25, [sp, #16 * 12]
 ldp	x26, x27, [sp, #16 * 13]
 ldp	x28, x29, [sp, #16 * 14]
 
-mrs x0, tpidr_el0               // thread pointer
-ldr x1, [x0, 48]
-mov sp, x1                      // tls: sp <- previous_stack
+mrs x9, tpidr_el0               // thread pointer
+ldr x10, [x9, 48]
+mov sp, x10                     // tls: sp <- previous_stack
 ret
