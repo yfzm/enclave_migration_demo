@@ -57,6 +57,7 @@ void dump_out(char *out)
 	offset = PS * mcode_pages;
 	addr = (char*)(enclave_start_addr + offset);
 	target = out + offset;
+    data_size = 0x1000000;
 	memcpy(target, addr, data_size);
 
 	//dump heap section
