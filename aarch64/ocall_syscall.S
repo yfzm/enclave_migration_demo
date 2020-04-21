@@ -46,7 +46,7 @@ br x10
 // mov outside_tramp, %rbx
 // mov $0x4, %rax					#EEXIT
 // 
-b eexit_tag
+// b eexit_tag
 // #enclu
 
 .section .text.ocall_return, "ax"

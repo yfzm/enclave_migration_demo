@@ -6,7 +6,7 @@
 .global enclave_start
 .type enclave_start, @function
 enclave_start:
-cmp x9, #INIT_SYSCALL  // init the enclave
+cmp x0, #INIT_SYSCALL  // init the enclave
 bne entry
 
 // use this enclave page as stack during initilization
