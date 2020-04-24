@@ -442,7 +442,7 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 		memcpy(ptr_out, ptr_in, i);
 	}
 #endif
-
+    
 	if(n == 16) // ioctl
 	{
 		ptr_out = (char*)outside_buffer + 0x1000;
@@ -531,6 +531,7 @@ long ocall_syscall4(long n, long a1, long a2, long a3, long a4)
 	long ret;
 	unsigned long *ptr;
 
+    int i;
 	char *ptr_in;
 	char *ptr_out;
 
@@ -600,6 +601,16 @@ long ocall_syscall4(long n, long a1, long a2, long a3, long a4)
 		ptr_out = (char*)outside_buffer + 0x1000;
 		*(ptr+5) = (unsigned long)ptr_out;	
 		memcpy(ptr_out, ptr_in, sizeof(struct epoll_event));
+	}
+
+	if(n == SYS_openat)
+	{
+		ptr_in = (char*)a2;
+		ptr_out = (char*)outside_buffer + 0x1000;
+		*(ptr+3) = (unsigned long)ptr_out;
+	
+		i = strlen(ptr_in) + 1; // include the str ending '\0'
+		memcpy(ptr_out, ptr_in, i);
 	}
 
 	ocall_syscall();
