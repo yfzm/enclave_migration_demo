@@ -45,8 +45,8 @@ void dump_out(char *out)
 	stack_size = 0x1fd000;
 	//stack_size = 0x4000;
 
-	printf("[copy] code 0x%lx, data 0x%lx, heap 0x%lx, stack 0x%lx\n",
-			code_size, data_size, heap_size, stack_size);
+	//printf("[copy] code 0x%lx, data 0x%lx, heap 0x%lx, stack 0x%lx\n",
+	//		code_size, data_size, heap_size, stack_size);
 
 	//dump code section
 	addr = (char*)enclave_start_addr;
@@ -81,6 +81,7 @@ void dump_out(char *out)
 	offset = PS * (mcode_pages + mdata_pages + mheap_pages);
 	addr = (char*)(enclave_start_addr + offset);
 	target = out + offset;
+    //printf("dump stack: %p <- %p, %lu\n", target, addr, mstack_pages*PS);
 	memcpy(target, addr, mstack_pages*PS);
 
 

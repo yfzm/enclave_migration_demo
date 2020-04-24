@@ -13,6 +13,9 @@
 #include "vars.h"
 #include "pthread.h"
 
+char *aarch64_fn = "./enclave/enclave_aarch64";
+char *x86_64_fn  = "./enclave/enclave_x86_64";
+
 int main(int argc, char* argv[])
 {
 #if 0
@@ -24,7 +27,14 @@ int main(int argc, char* argv[])
 		sleep(1);
 	}
 #else
-    write(1, "Hello World!\n", 13);
+    int msg_cnt = 0;
+	printf("This is the No.%d message from the app\n", ++msg_cnt);
+    migrate(1, 0, 0);
+    while (1) {
+		printf("This is the No.%d message from the app\n", ++msg_cnt);
+		sleep(1);
+    }
+    //write(1, "Hello World!\n", 13);
 #endif
 	return 0;
 }

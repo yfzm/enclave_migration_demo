@@ -1,6 +1,8 @@
 .vscode/
 build/
 
+tags
+
 *.o
 *.x
 *.txt
