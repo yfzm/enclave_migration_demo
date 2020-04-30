@@ -8,17 +8,18 @@ cmd=${1:-build}
 
 popcorn_path="/usr/local/popcorn"
 popcorn_bin="$popcorn_path/bin"
+lib_build_path="../build"
 
 x86_objs="
-    build/x86_64/stub.o
-    build/x86_64/ocall_syscall.o
-    build/x86_64/trampo.o
+    ${lib_build_path}/x86_64/stub.o
+    ${lib_build_path}/x86_64/ocall_syscall.o
+    ${lib_build_path}/x86_64/trampo.o
     ${APP}_x86_64.o
-    build/x86_64/init.o
-    build/x86_64/enclave_tls.o
-    build/x86_64/ocall_libcall_wrapper.o
-    build/x86_64/ocall_syscall_wrapper.o
-    build/x86_64/migration.o
+    ${lib_build_path}/x86_64/init.o
+    ${lib_build_path}/x86_64/enclave_tls.o
+    ${lib_build_path}/x86_64/ocall_libcall_wrapper.o
+    ${lib_build_path}/x86_64/ocall_syscall_wrapper.o
+    ${lib_build_path}/x86_64/migration.o
     $popcorn_path/x86_64/lib/crt1.o
     $popcorn_path/x86_64/lib/libc.a
     $popcorn_path/x86_64/lib/libmigrate.a
@@ -29,15 +30,15 @@ x86_objs="
 "
 
 arm_objs="
-    build/aarch64/stub.o
-    build/aarch64/ocall_syscall.o
-    build/aarch64/trampo.o
+    ${lib_build_path}/aarch64/stub.o
+    ${lib_build_path}/aarch64/ocall_syscall.o
+    ${lib_build_path}/aarch64/trampo.o
     ${APP}_aarch64.o
-    build/aarch64/init.o
-    build/aarch64/enclave_tls.o
-    build/aarch64/ocall_libcall_wrapper.o
-    build/aarch64/ocall_syscall_wrapper.o
-    build/aarch64/migration.o
+    ${lib_build_path}/aarch64/init.o
+    ${lib_build_path}/aarch64/enclave_tls.o
+    ${lib_build_path}/aarch64/ocall_libcall_wrapper.o
+    ${lib_build_path}/aarch64/ocall_syscall_wrapper.o
+    ${lib_build_path}/aarch64/migration.o
     $popcorn_path/aarch64/lib/crt1.o
     $popcorn_path/aarch64/lib/libc.a
     $popcorn_path/aarch64/lib/libmigrate.a
@@ -49,7 +50,7 @@ arm_objs="
 
 build() {
     # Make libs
-    make libs
+    make -C ../libs
 
     # Generate *.o
     $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
@@ -57,13 +58,13 @@ build() {
     echo "Link (1/2) generate map files"
     # Generate map.txt
     $popcorn_bin/ld.gold -L/usr/lib/gcc/x86_64-linux-gnu/5 -Map map_x86_64.txt \
-            -T x86_64/linker.lds \
+            -T ${lib_build_path}/x86_64/linker.lds \
             -o ${APP}_x86_64 \
             $x86_objs \
             --start-group -lgcc -lgcc_eh --end-group
 
     $popcorn_bin/ld.gold -L/usr/lib/gcc-cross/aarch64-linux-gnu/5 -Map map_aarch64.txt \
-            -T aarch64/linker.lds \
+            -T ${lib_build_path}/aarch64/linker.lds \
             -o ${APP}_aarch64 \
             $arm_objs \
             --start-group -lgcc -lgcc_eh --end-group

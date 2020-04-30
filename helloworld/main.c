@@ -10,7 +10,7 @@
 #include <string.h>
 
 //$(pwd)/include
-#include "vars.h"
+//#include "vars.h"
 #include "pthread.h"
 
 char *aarch64_fn = "./enclave/enclave_aarch64";
