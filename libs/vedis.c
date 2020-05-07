@@ -10961,6 +10961,7 @@ static void * MemBackendRealloc(SyMemBackend *pBackend, void * pOld, sxu32 nByte
 }
 VEDIS_PRIVATE void * SyMemBackendRealloc(SyMemBackend *pBackend, void * pOld, sxu32 nByte)
 {
+    //printf("[SyMemBackendRealloc] pBackend: %p, pOld: %p, nByte: %u\n", pBackend, pOld, nByte); // yfzm
 	void *pChunk;
 #if defined(UNTRUST)
 	if( SXMEM_BACKEND_CORRUPT(pBackend)  ){
@@ -11548,6 +11549,7 @@ VEDIS_PRIVATE sxi32 SySetInit(SySet *pSet, SyMemBackend *pAllocator, sxu32 ElemS
 VEDIS_PRIVATE sxi32 SySetPut(SySet *pSet, const void *pItem)
 {
 	unsigned char *zbase;
+    // printf("pSet->nUsed: %u, pSet->nSize: %u\n", pSet->nUsed, pSet->nSize);  // yfzm
 	if( pSet->nUsed >= pSet->nSize ){
 		void *pNew;
 		if( pSet->pAllocator == 0 ){
@@ -11562,8 +11564,10 @@ VEDIS_PRIVATE sxi32 SySetPut(SySet *pSet, const void *pItem)
 		}
 		pSet->pBase = pNew;
 		pSet->nSize <<= 1;
+        //printf("pSet->nBase: %p, pNew: %p\n", pSet->pBase, pNew);  // yfzm
 	}
 	zbase = (unsigned char *)pSet->pBase;
+    //printf("src: %p, dst: %p, size: %u, zbase: %p\n", pItem, &zbase[pSet->nUsed * pSet->eSize], pSet->eSize, zbase);  // yfzm
 	SX_MACRO_FAST_MEMCPY(pItem, &zbase[pSet->nUsed * pSet->eSize], pSet->eSize);
 	pSet->nUsed++;	
 	return SXRET_OK;
@@ -20909,6 +20913,9 @@ static sxi32 vedisCoreConfigure(sxi32 nOp, va_list ap)
 			}
 			/* Install it */
 			rc = SySetPut(&sVedisMPGlobal.kv_storage,(const void *)&pMethods);
+            //if (rc != 0) {
+                //printf("[yfzm] SySetPut return %d\n", rc);  // yfzm
+            //}
 			break;
 												}
 	    case VEDIS_LIB_CONFIG_VFS:{

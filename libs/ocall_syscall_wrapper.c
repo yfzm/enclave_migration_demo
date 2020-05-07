@@ -109,6 +109,7 @@ long ocall_syscall1(long n, long a1)
 	//size of enclave should at least be 0x8000.
 	if(n == SYS_brk) // 12
 	{
+        // printf("[SYS_brk] a1=%p, heap_start=%p\n", a1, &heap_start);  //yfzm
 		if(a1 == 0) //ask the start of heap
 		{
 			__init_brk = (long)&heap_start;

@@ -46,6 +46,10 @@ static const char zBanner[] = {
 	"                                    http://vedis.symisc.net/\n"
 	"============================================================\n"
 };
+
+char *aarch64_fn = "./enclave/enclave_aarch64";
+char *x86_64_fn = "./enclave/enclave_x86_64";
+
 /*
  * Extract the datastore error log and exit.
  */
@@ -74,6 +78,7 @@ static void Fatal(vedis *pStore,const char *zMsg)
 
 int main(int argc,char *argv[])
 {
+#if 0
 	vedis *pStore;            /* Vedis handle */
 	vedis_value *pResult;     /* Return value of the last executed command */
 	int rc;
@@ -99,6 +104,7 @@ int main(int argc,char *argv[])
 		Fatal(pStore,0);
 	}
 
+#if 0
 	/* A configuration hashtable */
 	rc = vedis_exec(pStore,"HSET config path '/usr/local/etc'",-1);
 	if( rc != VEDIS_OK ){
@@ -120,7 +126,8 @@ int main(int argc,char *argv[])
 	puts("Insertion..OK");
 	
 	/* Fetch some data */
-	
+#endif
+
 	vedis_exec(pStore,"GET test",-1);
 	/* Extract the return value of the last executed command (i.e. GET test) " */
 	rc = vedis_exec_result(pStore,&pResult);
@@ -135,6 +142,8 @@ int main(int argc,char *argv[])
 		printf(" test ==> %s\n",zResponse); /* test ==> 'Hello world' */
 	}
 
+    migrate(1, 0, 0);
+
 	vedis_exec(pStore,"GET mail",-1);
 	/* 'GET mail' return value */
 	rc = vedis_exec_result(pStore,&pResult);
@@ -148,6 +157,7 @@ int main(int argc,char *argv[])
 		printf(" mail ==> %s\n",zResponse); /* Should be 'dude@example.com' */
 	}
 
+#if 0	
 	/* 
 	 * A command which return multiple value in array.
 	 */
@@ -167,7 +177,6 @@ int main(int argc,char *argv[])
 			printf("\t%s\n",zEntry);
 		}
 	}
-	
 	/* Extract hashtable data (i.e. pid field) */
 	 vedis_exec(pStore,"HGET config pid",-1); /* 1024 */
 	
@@ -197,9 +206,33 @@ int main(int argc,char *argv[])
 			printf("\t%s\n",zEntry);
 		}
 	}
+#endif
 	puts("All done!");
 
 	/* Auto-commit the transaction and close our datastore */
 	vedis_close(pStore);
+#else
+    printf("Hello World\n");
+
+	vedis *pStore;            /* Vedis handle */
+	vedis_value *pResult;     /* Return value of the last executed command */
+	int rc;
+
+	/* Create our datastore */
+	rc = vedis_open(&pStore,argc > 1 ? argv[1] /* On-disk DB */ : ":mem:" /* In-mem DB */);
+	if( rc != VEDIS_OK ){
+		Fatal(0,"Out of memory");
+	}
+	
+	/* Execute the simplest command */
+	rc = vedis_exec(pStore,"SET test 'Hello World'",-1);
+	//if( rc != VEDIS_OK ){
+	//	/* Seriously? */
+	//	Fatal(pStore,0);
+	//}
+	puts(zBanner);
+    migrate(1, 0, 0);
+    printf("Exit\n");
+#endif
 	return 0;
 }
