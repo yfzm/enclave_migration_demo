@@ -57,7 +57,8 @@ void dump_out(char *out)
 	offset = PS * mcode_pages;
 	addr = (char*)(enclave_start_addr + offset);
 	target = out + offset;
-    data_size = 0x1000000;
+    //data_size = 0x1000000;
+    data_size = 0x800000;
 	memcpy(target, addr, data_size);
 
 	//dump heap section
@@ -66,7 +67,9 @@ void dump_out(char *out)
 	target = out + offset;
 	if(heap_size > (mheap_pages*PS))
 		heap_size = mheap_pages*PS;
-	memcpy(target, addr, heap_size);
+    //printf("[heap] target: %p, addr %p, size: %lx\n", target, addr, heap_size);
+	//memcpy(target, addr, heap_size);
+    memcpy(target, addr+0x20000000, 0x4000000);
 
 #if 0
 	//TODO: multiple threads

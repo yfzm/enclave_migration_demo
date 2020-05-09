@@ -78,7 +78,6 @@ static void Fatal(vedis *pStore,const char *zMsg)
 
 int main(int argc,char *argv[])
 {
-#if 0
 	vedis *pStore;            /* Vedis handle */
 	vedis_value *pResult;     /* Return value of the last executed command */
 	int rc;
@@ -143,12 +142,15 @@ int main(int argc,char *argv[])
 	}
 
     migrate(1, 0, 0);
+    printf("after migrate\n");
 
+    printf("pStore: %p\n", pStore);
 	vedis_exec(pStore,"GET mail",-1);
 	/* 'GET mail' return value */
 	rc = vedis_exec_result(pStore,&pResult);
+    printf("rc=%d\n", rc);
 	if( rc != VEDIS_OK ){
-		Fatal(pStore,0);
+		Fatal(pStore, "Wrong!");
 	}else{
 		const char *zResponse;
 		/* Cast the vedis object to a string */
@@ -211,28 +213,6 @@ int main(int argc,char *argv[])
 
 	/* Auto-commit the transaction and close our datastore */
 	vedis_close(pStore);
-#else
-    printf("Hello World\n");
-
-	vedis *pStore;            /* Vedis handle */
-	vedis_value *pResult;     /* Return value of the last executed command */
-	int rc;
-
-	/* Create our datastore */
-	rc = vedis_open(&pStore,argc > 1 ? argv[1] /* On-disk DB */ : ":mem:" /* In-mem DB */);
-	if( rc != VEDIS_OK ){
-		Fatal(0,"Out of memory");
-	}
-	
-	/* Execute the simplest command */
-	rc = vedis_exec(pStore,"SET test 'Hello World'",-1);
-	//if( rc != VEDIS_OK ){
-	//	/* Seriously? */
-	//	Fatal(pStore,0);
-	//}
-	puts(zBanner);
-    migrate(1, 0, 0);
-    printf("Exit\n");
-#endif
+    while (1) ;
 	return 0;
 }
