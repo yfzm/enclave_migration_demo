@@ -64,6 +64,14 @@ void ocall_debug(long a1)
 	ocall_syscall();
 }
 
+void ocall_senddata()
+{
+    unsigned long *ptr;
+    ptr = (unsigned long *)outside_buffer;
+    *ptr = 9;
+    ocall_syscall();
+}
+
 long ocall_syscall0(long n)
 {
 	long ret;

@@ -13,6 +13,8 @@
 //#include "vars.h"
 #include "pthread.h"
 
+extern int migration_flag;
+
 char *aarch64_fn = "./enclave/enclave_aarch64";
 char *x86_64_fn  = "./enclave/enclave_x86_64";
 
@@ -29,8 +31,10 @@ int main(int argc, char* argv[])
 #else
     int msg_cnt = 0;
 	printf("This is the No.%d message from the app\n", ++msg_cnt);
-    migrate(1, 0, 0);
+    //migration_flag = 1;
+    // migrate(1, 0, 0);
     while (1) {
+        check_migrate(0, 0);
 		printf("This is the No.%d message from the app\n", ++msg_cnt);
 		sleep(1);
     }

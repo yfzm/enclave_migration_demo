@@ -103,7 +103,7 @@ int main(int argc,char *argv[])
 		Fatal(pStore,0);
 	}
 
-#if 0
+#if 1
 	/* A configuration hashtable */
 	rc = vedis_exec(pStore,"HSET config path '/usr/local/etc'",-1);
 	if( rc != VEDIS_OK ){
@@ -159,7 +159,7 @@ int main(int argc,char *argv[])
 		printf(" mail ==> %s\n",zResponse); /* Should be 'dude@example.com' */
 	}
 
-#if 0	
+#if 1	
 	/* 
 	 * A command which return multiple value in array.
 	 */

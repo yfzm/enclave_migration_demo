@@ -13,6 +13,7 @@
 extern unsigned long enclave_start;
 extern unsigned long __init_brk, __brk;
 extern unsigned long init_stack_1;
+extern int migration_flag;
 
 unsigned long mcode_pages = 0;
 unsigned long mdata_pages = 0;
@@ -22,6 +23,12 @@ unsigned long mthread_pages = 0;
 
 #define ENABLE_COPY_NECESSARY 1
 #if ENABLE_COPY_NECESSARY
+
+void set_migration_flag()
+{
+    migration_flag = 1;
+}
+
 void dump_out(char *out)
 {
 	char *addr;
@@ -59,6 +66,7 @@ void dump_out(char *out)
 	target = out + offset;
     //data_size = 0x1000000;
     data_size = 0x800000;
+    printf("[data] target: %p, addr: %p, size: %lx\n", target, addr, data_size);
 	memcpy(target, addr, data_size);
 
 	//dump heap section
@@ -67,9 +75,10 @@ void dump_out(char *out)
 	target = out + offset;
 	if(heap_size > (mheap_pages*PS))
 		heap_size = mheap_pages*PS;
-    //printf("[heap] target: %p, addr %p, size: %lx\n", target, addr, heap_size);
+    printf("[heap] target: %p, addr: %p, size: %lx\n", target, addr, heap_size);
 	//memcpy(target, addr, heap_size);
-    memcpy(target, addr+0x20000000, 0x4000000);
+	memcpy(target, addr, 0x4000000);
+    //memcpy(target, addr+0x20000000, 0x4000000);
 
 #if 0
 	//TODO: multiple threads
@@ -84,7 +93,7 @@ void dump_out(char *out)
 	offset = PS * (mcode_pages + mdata_pages + mheap_pages);
 	addr = (char*)(enclave_start_addr + offset);
 	target = out + offset;
-    //printf("dump stack: %p <- %p, %lu\n", target, addr, mstack_pages*PS);
+    printf("[stck] target: %p, addr: %p, size: %lx\n", target, addr, mstack_pages*PS);
 	memcpy(target, addr, mstack_pages*PS);
 
 
@@ -97,6 +106,7 @@ void dump_out(char *out)
 	{
 		if(skip_tcs % 3 != 0)
 		{
+//            printf("dump tls: target: %p, addr: %p\n", target, addr);
 			memcpy(target, addr, PS);
 			//for(j = 0; j < PS; ++j)
 			//	target[j] = addr[j];

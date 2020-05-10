@@ -16,6 +16,7 @@
 void init_syscall(unsigned long*);
 //void my_start();
 int main(int argc, char* argv[]);
+void set_migration_flag();
 void dump_out(char *out);
 
 void trampoline(long function_choice, unsigned long arg)
@@ -43,7 +44,8 @@ void trampoline(long function_choice, unsigned long arg)
 			main(argc, argv);
 			break;
 		case MIGRATE:
-			dump_out((char*)arg);
+            set_migration_flag();
+			//dump_out((char*)arg);
 			break;
 		//default: new thread
 		default:
