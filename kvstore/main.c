@@ -1,15 +1,14 @@
 /*
- * Compile this file together with the Vedis datastore engine source code
- * to generate the executable. For example: 
- *  gcc -W -Wall -O6 vedis_intro.c vedis.c -o vedis_intro
-*/
+ * Compile this file together with the vedis engine source code to generate
+ * the desired executable. For example: 
+ *  gcc -W -Wall -O6 vedis_shell.c vedis.c -o vedis_shell
+ */
 /*
- * This simple program is a quick introduction on how to embed and start
- * experimenting with Vedis without having to do a lot of tedious
- * reading and configuration.
+ * The Vedis shell is a simple standalone program which let you execute
+ * built-in Vedis commands from your command line interface (CLI).
  *
  * Introduction to the Command Execution Interfaces (CEI):
- * 
+ *
  * Structured data storage is presented to clients via the command execution interface.
  * Basically, you execute one or more commands ala Redis (i.e. SET key value; HSET ds key value, GET key)
  * via [vedis_exec()] and you extract the execution result (The return value of the command) via 
@@ -28,191 +27,201 @@
  * Built-in Vedis Commands:
  *        http://vedis.symisc.net/commands.html
  */
-/* $SymiscID: vedis_intro.c v1.0 Win7 2013-09-12 02:05 stable <chm@symisc.net> $ */
-/* 
- * Make sure you have the latest release of Vedis from:
+/* $SymiscID: vedis_shell.c v1.0.4 Linux 2013-09-15 02:22 stable <devel@symisc.net> $ */
+
+/* Make sure you have the latest release of the Vedis engine
+ * from:
  *  http://vedis.symisc.net/downloads.html
  */
-#include <stdio.h>  /* puts() */
-#include <stdlib.h> /* exit() */
+#include <stdio.h>
+#include <stdlib.h>
 /* Make sure this header file is available.*/
 #include "vedis.h"
+
+char *aarch64_fn = "./enclave/enclave_aarch64";
+char *x86_64_fn = "./enclave/enclave_x86_64";
+
+/* 
+ * Display an error message and exit.
+ */
+static void Fatal(const char *zMsg)
+{
+	puts(zMsg);
+	/* Shutdown the library */
+	vedis_lib_shutdown();
+	/* Exit immediately */
+	exit(0);
+}
 /*
  * Banner.
  */
 static const char zBanner[] = {
 	"============================================================\n"
-	"Vedis Command Execution Intro                               \n"
+	" Simple Vedis Shell                                         \n"
 	"                                    http://vedis.symisc.net/\n"
+	" Enter one or more Vedis commands.                          \n"
+	"                                                            \n"
+	" Type 'CMD_LIST' for a list of built-in Vedis commands.     \n"
+	"                                                            \n"
+	" Enter a blank line to exit the shell                       \n"
 	"============================================================\n"
 };
-
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn = "./enclave/enclave_x86_64";
-
 /*
- * Extract the datastore error log and exit.
+ * atexit() callback. Shutdown the Vedis library.
  */
-static void Fatal(vedis *pStore,const char *zMsg)
+void vedis_exit(void)
 {
-	if( pStore ){
-		const char *zErr;
-		int iLen = 0; /* Stupid cc warning */
-
-		/* Extract the datastore error log */
-		vedis_config(pStore,VEDIS_CONFIG_ERR_LOG,&zErr,&iLen);
-		if( iLen > 0 ){
-			/* Output the error log */
-			puts(zErr); /* Always null termniated */
-		}
-	}else{
-		if( zMsg ){
-			puts(zMsg);
-		}
-	}
-	/* Manually shutdown the library */
 	vedis_lib_shutdown();
-	/* Exit immediately */
-	exit(0);
 }
-
-int main(int argc,char *argv[])
+#include <ctype.h>
+/*
+ * Return true only if we are dealing with a blank line.
+ */
+int isBlank(char *zIn,unsigned int nByte)
 {
-	vedis *pStore;            /* Vedis handle */
-	vedis_value *pResult;     /* Return value of the last executed command */
+#if 1
+    //printf("[enter is_blank] zIn: %p, nByte: %u\n", zIn, nByte);
+	//const char *zEnd = &zIn[nByte];
+	char *zEnd = (char *)((unsigned long)zIn + nByte);
+    //printf("zIn: %p, zEnd: %p, size: %u\n", zIn, zEnd, nByte);
+	while( zIn < zEnd && (isspace(zIn[0])) ){
+		/* Advance the cursor */
+		zIn++;
+	}
+    //printf("zIn[0]: %c, zIn: %p, zEnd: %p\n", zIn[0], zIn, zEnd);
+	//printf("return: %d\n", (zIn[0] == 0 || zIn >= zEnd) ? 1 : 0);
+	return (zIn[0] == 0 || zIn >= zEnd) ? 1 : 0;
+#else
+    int i = 0;
+    for (; i < nByte && isspace(zIn[i]); i++) ; 
+    return (i == nByte) ? 1 : 0;
+#endif
+}
+/* Forward declaration */
+struct array_rend
+{
+	int is_first;
+	int cnt;
+};
+static int array_render(vedis_value *pEntry,void *pUserdata);
+/*
+ * Command result consumer callback. Each time a command is executed
+ * the engine will invoke this callback in order to consume the
+ * execution result (i.e. return value) of the last executed command.
+ *
+ * This callback is registered later via vedis_config() using VEDIS_CONFIG_OUTPUT_CONSUMER
+ * as a configuration option. 
+ */
+static int command_result_render(vedis_value *pResult,void *pUnused /* userdata */)
+{
+	const char *zResult = 0;
+	if( vedis_value_is_null(pResult) ){
+		zResult = "<null>";
+	}else if( vedis_value_is_array(pResult) ){
+		struct array_rend sRend = { 1 , 0 };
+		/* Command return an array, render it */
+		vedis_array_walk(pResult,array_render,&sRend);
+	}else{
+		/* Explicitly cast the result to a null terminated string */
+		zResult = vedis_value_to_string(pResult,0);
+	}
+	if( zResult ){
+		puts(zResult);
+	}
+	return VEDIS_OK;
+}
+/* Vedis shell */
+int main(int argc,char **argv)
+{
+	char zBuf[4096],*zPtr; /* Read buffer */
+	vedis *pStore;         /* Vedis handle */
 	int rc;
 
+	/* Create our datastore */
+	rc = vedis_open(&pStore,argc > 1 ? argv[1] /* An on-disk data store */ : ":mem:" /* An in-memory data store*/);
+	if( rc != VEDIS_OK ){
+		/* Seriously? */
+		Fatal("Vedis is running out of memory");
+	}
+
+	/* Register the result (command return value) consumer callback */
+	vedis_config(pStore,VEDIS_CONFIG_OUTPUT_CONSUMER,command_result_render,0 /* userdata */);
+	
+	/* Register the atexit() callback */
+	atexit(vedis_exit);
+	
+	/* Start the shell */
 	puts(zBanner);
 
-	/* Create our datastore */
-	rc = vedis_open(&pStore,argc > 1 ? argv[1] /* On-disk DB */ : ":mem:" /* In-mem DB */);
-	if( rc != VEDIS_OK ){
-		Fatal(0,"Out of memory");
-	}
-	
-	/* Execute the simplest command */
-	rc = vedis_exec(pStore,"SET test 'Hello World'",-1);
-	if( rc != VEDIS_OK ){
-		/* Seriously? */
-		Fatal(pStore,0);
-	}
-
-	/* Another simple command (Multiple set) */
-	rc = vedis_exec(pStore,"MSET username james age 27 mail dude@example.com",-1);
-	if( rc != VEDIS_OK ){
-		Fatal(pStore,0);
-	}
-
 #if 1
-	/* A configuration hashtable */
-	rc = vedis_exec(pStore,"HSET config path '/usr/local/etc'",-1);
-	if( rc != VEDIS_OK ){
-		Fatal(pStore,0);
-	}
-	
-	/* A quite complex command (Multiple hash set) using foreign data */
-	rc = vedis_exec_fmt(pStore,
-		"HMSET config pid %d user %s os %s scm %s",
-		1024 /* pid */,
-		"dean", /* user */ 
-		"FreeBSD", /* OS */
-		"Git" /* SCM */
-		);
-	if( rc != VEDIS_OK ){
-		Fatal(pStore,0);
-	}
-
-	puts("Insertion..OK");
-	
-	/* Fetch some data */
-#endif
-
-	vedis_exec(pStore,"GET test",-1);
-	/* Extract the return value of the last executed command (i.e. GET test) " */
-	rc = vedis_exec_result(pStore,&pResult);
-	if( rc != VEDIS_OK ){
-		/* Seriously? */
-		Fatal(pStore,0);
-	}else{
-		const char *zResponse;
-		/* Cast the vedis object to a string */
-		zResponse = vedis_value_to_string(pResult,0);
-		/* Output */
-		printf(" test ==> %s\n",zResponse); /* test ==> 'Hello world' */
-	}
-
-    migrate(1, 0, 0);
-    printf("after migrate\n");
-
-    printf("pStore: %p\n", pStore);
-	vedis_exec(pStore,"GET mail",-1);
-	/* 'GET mail' return value */
-	rc = vedis_exec_result(pStore,&pResult);
-    printf("rc=%d\n", rc);
-	if( rc != VEDIS_OK ){
-		Fatal(pStore, "Wrong!");
-	}else{
-		const char *zResponse;
-		/* Cast the vedis object to a string */
-		zResponse = vedis_value_to_string(pResult,0);
-		/* Output */
-		printf(" mail ==> %s\n",zResponse); /* Should be 'dude@example.com' */
-	}
-
-#if 1	
-	/* 
-	 * A command which return multiple value in array.
-	 */
-	vedis_exec(pStore,"MGET username age",-1); /* james 27*/
-	
-	vedis_exec_result(pStore,&pResult);
-	
-	if( vedis_value_is_array(pResult) ){
-		/* Iterate over the elements of the returned array */
-		vedis_value *pEntry;
-		puts("Array entries:");
-		while((pEntry = vedis_array_next_elem(pResult)) != 0 ){
-			const char *zEntry;
-			/* Cast to string and output */
-			zEntry = vedis_value_to_string(pEntry,0);
-			/* Output */
-			printf("\t%s\n",zEntry);
+	for(;;){
+        sleep(5);
+        check_migrate(0, 0);
+		fputs("vedis>",stdout);
+        fflush(stdout);
+		zPtr = fgets(zBuf,sizeof(zBuf),stdin);
+        //printf("zPtr: %p, zBuf: %s\n", zPtr, zBuf);
+		if( !zPtr || isBlank(zBuf,sizeof(zBuf)) ){
+			/* Blank line - exit */
+			//puts("Exiting...comitting the transaction");
+			//break;
+			puts("  (empty line) continue...");
+            continue;
 		}
-	}
-	/* Extract hashtable data (i.e. pid field) */
-	 vedis_exec(pStore,"HGET config pid",-1); /* 1024 */
-	
-	vedis_exec_result(pStore,&pResult);
-	{
-		int pid;
-		/* Cast to integer */
-		pid = vedis_value_to_int(pResult);
-		/* Output */
-		printf("pid ==> %d\n",pid); /* Should be 1024 */
-	}
 
-	/* All hashtable data */
-	vedis_exec(pStore,"HVALS config",-1); /* All 'config' values */
-	
-	vedis_exec_result(pStore,&pResult);
-	
-	if( vedis_value_is_array(pResult) ){
-		/* Iterate over the elements of the returned array */
-		vedis_value *pEntry;
-		puts("Array entries:");
-		while((pEntry = vedis_array_next_elem(pResult)) != 0 ){
-			const char *zEntry;
-			/* Cast to string and output */
-			zEntry = vedis_value_to_string(pEntry,0);
-			/* Output */
-			printf("\t%s\n",zEntry);
+		/* Exectute the command */
+		rc = vedis_exec(pStore,zBuf,-1);
+		if( rc != VEDIS_OK ){
+			/* Error during execution. Extract the error log */
+			const char *zErr;
+			int nLen;
+			vedis_config(pStore,VEDIS_CONFIG_ERR_LOG,&zErr,&nLen);
+			if( nLen > 0 ){
+				puts(zErr);
+			}
+			if( rc != VEDIS_UNKNOWN /* Unknown command */){
+				/* Exit immediately */
+				break;
+			}
 		}
-	}
+		
+	}/* for(;;) */
+#else
+    int i = 0;
+    for (;;) {
+        sprintf(zBuf, "SET key%d value%d", i, i);
+        vedis_exec(pStore, zBuf, -1);
+        sleep(1);
+        check_migrate(0, 0);
+        sprintf(zBuf, "GET key%d", i);
+        vedis_exec(pStore, zBuf, -1);
+        ++i;
+    }
 #endif
-	puts("All done!");
+    puts("Should never touch here!");
 
-	/* Auto-commit the transaction and close our datastore */
+	/* Auto-commit and close the vedis handle */
 	vedis_close(pStore);
-    while (1) ;
 	return 0;
+}
+/*
+ * Array walker callback: Output array fields.
+ *
+ * This function is passed to the array_walk() interface which is
+ * invoked for each array entry.
+ */
+static int array_render(vedis_value *pEntry,void *pUserdata)
+{
+	struct array_rend *pRend = (struct array_rend *)pUserdata;
+	const char *zValue;
+	int nByte;
+	if( vedis_value_is_null(pEntry) ){
+		zValue = "<null>";
+		nByte = (int)sizeof("<null>") - 1;
+	}else{
+		/* Extract entry contents */
+		zValue = vedis_value_to_string(pEntry,&nByte);
+	}
+	printf("%d) %.*s\n",++pRend->cnt,nByte,zValue);
+	return VEDIS_OK;
 }
