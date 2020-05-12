@@ -8,7 +8,7 @@ lds := linker.lds
 
 LIB_HDR := $(shell ls include/*.h)
 LIBS    := stub.o init.o trampo.o enclave_tls.o ocall_syscall_wrapper.o \
-	       ocall_syscall.o ocall_libcall_wrapper.o migration.o vedis.o
+	       ocall_syscall.o ocall_libcall_wrapper.o migration.o $(EXTRA_LIBS)  # vedis.o
 BUILD_PATH := ../build
 
 init_files := init.o enclave_tls.o

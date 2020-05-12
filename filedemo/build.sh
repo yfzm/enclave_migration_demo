@@ -2,7 +2,7 @@
 set -e
 
 APP=main
-CFLAGS='-I../libs/include'
+CFLAGS='-I./include'
 
 cmd=${1:-build}
 
@@ -20,7 +20,6 @@ x86_objs="
     ${lib_build_path}/x86_64/ocall_libcall_wrapper.o
     ${lib_build_path}/x86_64/ocall_syscall_wrapper.o
     ${lib_build_path}/x86_64/migration.o
-    ${lib_build_path}/x86_64/vedis.o
     $popcorn_path/x86_64/lib/crt1.o
     $popcorn_path/x86_64/lib/libc.a
     $popcorn_path/x86_64/lib/libmigrate.a
@@ -40,7 +39,6 @@ arm_objs="
     ${lib_build_path}/aarch64/ocall_libcall_wrapper.o
     ${lib_build_path}/aarch64/ocall_syscall_wrapper.o
     ${lib_build_path}/aarch64/migration.o
-    ${lib_build_path}/aarch64/vedis.o
     $popcorn_path/aarch64/lib/crt1.o
     $popcorn_path/aarch64/lib/libc.a
     $popcorn_path/aarch64/lib/libmigrate.a
@@ -52,7 +50,7 @@ arm_objs="
 
 build() {
     # Make libs
-    make -C ../libs EXTRA_LIBS=vedis.o
+    make -C ../libs
 
     # Generate *.o
     $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
