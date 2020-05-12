@@ -77,19 +77,14 @@ void vedis_exit(void)
 /*
  * Return true only if we are dealing with a blank line.
  */
-int isBlank(char *zIn,unsigned int nByte)
+int isBlank(const char *zIn,unsigned int nByte)
 {
 #if 1
-    //printf("[enter is_blank] zIn: %p, nByte: %u\n", zIn, nByte);
-	//const char *zEnd = &zIn[nByte];
-	char *zEnd = (char *)((unsigned long)zIn + nByte);
-    //printf("zIn: %p, zEnd: %p, size: %u\n", zIn, zEnd, nByte);
+	const char *zEnd = &zIn[nByte];
 	while( zIn < zEnd && (isspace(zIn[0])) ){
 		/* Advance the cursor */
 		zIn++;
 	}
-    //printf("zIn[0]: %c, zIn: %p, zEnd: %p\n", zIn[0], zIn, zEnd);
-	//printf("return: %d\n", (zIn[0] == 0 || zIn >= zEnd) ? 1 : 0);
 	return (zIn[0] == 0 || zIn >= zEnd) ? 1 : 0;
 #else
     int i = 0;
