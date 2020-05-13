@@ -1,4 +1,4 @@
-working_path=${1:-helloworld}
+working_path=${1:-filedemo}
 (make ${working_path}) || exit 1
 scp ${working_path}/final_main_x86_64 wxy:~/workspace/sgx-driver/enclave/enclave
 scp ${working_path}/final_main_x86_64 wxy:~/workspace/sgx-driver/enclave/enclave_x86_64

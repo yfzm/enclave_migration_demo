@@ -16,5 +16,7 @@ filedemo: libs
 clean:
 	make -C libs clean
 	make -C helloworld clean
+	make -C kvstore clean
+	make -C filedemo clean
 
 .PHONY: all clean libs helloworld kvstore filedemo

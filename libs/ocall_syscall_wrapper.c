@@ -117,7 +117,7 @@ long ocall_syscall1(long n, long a1)
 	//size of enclave should at least be 0x8000.
 	if(n == SYS_brk) // 12
 	{
-        printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
+        //printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
 		if(a1 == 0) //ask the start of heap
 		{
 			__init_brk = (long)&heap_start;
@@ -157,6 +157,16 @@ long ocall_syscall1(long n, long a1)
 	}
 
 	ocall_syscall();
+
+    if (n == SYS_close) {
+        ret = *ptr;
+        //printf("[SYS_close] return %d, fd %d\n", ret, a1);
+        if (ret == 0) {
+            //printf("[sys_close] %d\n", a1);
+            close_fd(a1);
+        }
+        return ret;
+    }
 
 #ifdef SYS_pipe
 	if(n == SYS_pipe) //22
@@ -495,6 +505,15 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 		memcpy((void*)a3, ptr_out, sizeof(struct winsize));
 	}
 
+#ifdef SYS_open
+    if (n == SYS_open) {
+        ret = *ptr;
+        if (ret >= 0)
+            init_fd(ret, a1, a2, a3);
+        return ret;
+    }
+#endif
+
 	if(n == SYS_readv) // readv: copy data into enclave
 	{
 		base1 = (void*)outside_buffer + 0x1000;
@@ -512,6 +531,8 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 			s_vec += 1;
 			t_vec += 1;
 		}
+
+        set_fd_cursor(a1);
 	}
 
 	if(n == SYS_read)
@@ -522,6 +543,8 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 			ptr_in = (char*)a2;
 			ptr_out = (char*)outside_buffer + 0x1000;
 			memcpy(ptr_in, ptr_out, a3);
+            set_fd_cursor(a1);
+            //increase_fd_cursor(a1, ret);
 		}
 		if(ret < 0)
 		{
@@ -530,6 +553,22 @@ long ocall_syscall3(long n, long a1, long a2, long a3)
 			return -1;
 		}
 	}
+
+    if (n == SYS_write)
+    {
+        ret = *ptr;
+        if (ret > 0) {
+            set_fd_cursor(a1);
+        }
+        return ret;
+    }
+
+    if (n == SYS_lseek)
+    {
+        ret = *ptr;
+        set_fd_cursor_at(a1, ret);
+        return ret;
+    }
 
 	ret = *ptr;
 	return ret;	
@@ -623,6 +662,12 @@ long ocall_syscall4(long n, long a1, long a2, long a3, long a4)
 	}
 
 	ocall_syscall();
+
+    if (n == SYS_openat) {
+        ret = *ptr;
+        init_fd(ret, (char *)a2, a3, a4);
+        return ret;
+    }
 
 	if(n == SYS_epoll_ctl)
 	{

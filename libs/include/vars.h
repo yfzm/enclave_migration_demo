@@ -10,6 +10,16 @@ extern unsigned long heap_end;
 
 extern unsigned long outside_tramp;
 
+#define MAX_FD 8
+#define UNTRACED_FD 4
+#define MAX_PATH_LEN 48
+struct fd_info {
+    char path[MAX_PATH_LEN];
+    long cursor;
+    int flags;
+    int mode;
+};
+
 //enclave thread local storage
 struct enclave_tls {
 	struct enclave_tls *self; // point to itself
@@ -23,6 +33,7 @@ struct enclave_tls {
 	unsigned long _pthread_id;
 
 	unsigned long _outside_fs;
+    struct fd_info _open_fds[MAX_FD];
 };
 
 
@@ -46,5 +57,11 @@ extern unsigned long *__tls_outside_buffer(void);
 
 extern unsigned long *__tls_previous_stack(void);
 #define previous_stack (*__tls_previous_stack())
+
+extern int init_fd(int fd, char *path, int flag, int mode);
+//extern int increase_fd_cursor(int fd, unsigned long size);
+extern int set_fd_cursor(int fd);
+extern int set_fd_cursor_at(int fd, long offset);
+extern int close_fd(int fd);
 
 #endif
