@@ -26,6 +26,10 @@ extern unsigned long mheap_pages;
 extern unsigned long mstack_pages;
 extern unsigned long mthread_pages;
 
+//defined in popcorn-comiler/migrate.c
+extern int migration_ready[16];
+//extern int *migration_ready;
+
 static inline bool is_out_enclave(unsigned long addr)
 {
 	if((addr < (unsigned long)&enclave_start) || (addr > (unsigned long)&enclave_end))
@@ -41,7 +45,7 @@ static inline bool is_out_enclave(unsigned long addr)
 
 //TODO
 #define TLS_OFFSET 0x3000
-#define FIXED_STACK_SIZE 0x7d000
+#define FIXED_STACK_SIZE 0x800000
 
 //CAN NOT OCALL during initialization
 void init_syscall(unsigned long *args_buffer)
@@ -51,6 +55,7 @@ void init_syscall(unsigned long *args_buffer)
 	unsigned long stack_t;
 
 	etid = *(args_buffer + 3);
+    migration_ready[etid] = 1;  // 0: void, 1: normal
 	if(etid == 0)
 	{
 		//trampoline outside the enclave

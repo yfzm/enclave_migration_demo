@@ -15,6 +15,11 @@ static inline struct enclave_tls *__tls_self()
 	return self;                                          
 }                                                         
 
+unsigned *__tls_etid(void)
+{
+    return &(__tls_self()->etid);
+}
+
 int *__tls_errno_location(void)
 {
 	return &(__tls_self()->_errno);
