@@ -36,9 +36,12 @@ stp	x30, x21, [sp, #16 * 15]    // save return address (rip)
 mrs x9, tpidr_el0               // thread pointer
 ldr x10, [x9, 32]
 mov sp, x10                     // tls: sp <- outside_stack
-ldr x9, =outside_tramp
-ldr x10, [x9]
+
+ldr x10, [x9, 72]               // tls: outside_tramp
 br x10
+//ldr x9, =outside_tramp
+//ldr x10, [x9]
+//br x10
 
 //[!!! exit trustzone]
 

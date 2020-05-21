@@ -16,7 +16,7 @@ extern unsigned long init_stack_4;
 extern unsigned long heap_start;
 extern unsigned long heap_end;
 
-unsigned long outside_tramp;
+//unsigned long outside_tramp;
 unsigned long fake_heap;
 
 //defined in migration.c
@@ -59,7 +59,7 @@ void init_syscall(unsigned long *args_buffer)
 	if(etid == 0)
 	{
 		//trampoline outside the enclave
-		outside_tramp = *args_buffer;
+		//outside_tramp = *args_buffer;
 		fake_heap = *(args_buffer + 5);
 
 		//migraion.c
@@ -118,6 +118,8 @@ void init_syscall(unsigned long *args_buffer)
 
 	//outside FS
 	*(ptr + 8) = *(args_buffer + 11);
+    //outside trampo
+    *(ptr + 9) = *args_buffer;
 
 	//if(init_done == 1) return;
 

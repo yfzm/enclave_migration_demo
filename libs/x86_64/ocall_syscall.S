@@ -32,7 +32,8 @@ push %r15
 pushfq
 
 mov %fs:32, %rsp 				#tls: mov outside_stack, %rsp
-mov outside_tramp, %rbx
+#mov outside_tramp, %rbx
+mov %fs:72, %rbx
 mov $0x4, %rax					#EEXIT
 
 jmp eexit_tag

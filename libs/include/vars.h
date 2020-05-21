@@ -8,8 +8,6 @@ extern unsigned long enclave_end;
 extern unsigned long heap_start;
 extern unsigned long heap_end;
 
-extern unsigned long outside_tramp;
-
 #define MAX_FD 8
 #define UNTRACED_FD 4
 #define MAX_PATH_LEN 48
@@ -33,6 +31,7 @@ struct enclave_tls {
 	unsigned long _pthread_id;
 
 	unsigned long _outside_fs;
+    unsigned long _outside_tramp;
     struct fd_info _open_fds[MAX_FD];
 };
 
