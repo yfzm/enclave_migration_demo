@@ -31,6 +31,10 @@
 unsigned long __brk = 0 ; //used in migration thread
 unsigned long __init_brk = 0; //used in migration thread
 
+#define MALLOC_AREA_SIZE   0x8000000    // 128 MB
+#define MMAP_AREA_SIZE     0x10000000   // 256 MB
+unsigned long __cur_mmap = 0;
+
 //simple spin lock
 /*
 volatile static int lockflag;
@@ -117,13 +121,13 @@ long ocall_syscall1(long n, long a1)
 	//size of enclave should at least be 0x8000.
 	if(n == SYS_brk) // 12
 	{
-        //printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
+        printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
 		if(a1 == 0) //ask the start of heap
 		{
 			__init_brk = (long)&heap_start;
 			return (long)&heap_start;
 		}
-		else if((unsigned long)a1 <= (((unsigned long)&heap_start) + 128 * 1024 * 1024))
+		else if((unsigned long)a1 <= (((unsigned long)&heap_start) + MALLOC_AREA_SIZE))
 		{
 			__brk = a1;
 			return a1; //use 128M inside the heap region for malloc (other for mmap)
@@ -193,6 +197,16 @@ long ocall_syscall2(long n, long a1, long a2)
 	void *ptr_out;
 	void *ptr_in;
 	int len;
+
+    if (n == SYS_munmap)
+    {
+        printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
+        if (a1 >= (unsigned long)(&heap_start) + MALLOC_AREA_SIZE &&
+                a1 < (unsigned long)(&heap_start) + MALLOC_AREA_SIZE + MMAP_AREA_SIZE) {
+            printf("[SYS_munmap] skip enclave mmap area\n");
+            return 0;
+        }
+    }
 
 	ptr = (unsigned long*)outside_buffer;
 	*ptr = 2;
@@ -739,6 +753,25 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
 	long ret;
 	unsigned long *ptr;
 
+    if (n == SYS_mmap)
+    {
+        printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
+        //printf("__cur_mmap: %p\n", __cur_mmap);
+        if (a1 == 0 && a5 == -1) {
+            if (__cur_mmap == 0) {
+                __cur_mmap = (unsigned long)(&heap_start) + MALLOC_AREA_SIZE;
+            }
+            if (__cur_mmap + a2 < (unsigned long)(&heap_start) + MALLOC_AREA_SIZE + MMAP_AREA_SIZE) {
+                __cur_mmap += a2;
+                return __cur_mmap - a2;
+            } else {
+                printf("[SYS_mmap] Error: exceed mmap area!\n");
+                exit(1);
+            }
+        }
+        //printf("[SYS_mmap] not supported yet!\nUse outer mmap...\n");
+    }
+	
 	char *ptr_in;
 	char *ptr_out;
 
@@ -760,7 +793,7 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
 	*(ptr+5) = a4;
 	*(ptr+6) = a5;
 	*(ptr+7) = a6;
-	
+
 	if(n == SYS_accept4) //288
 	{
 		if(a2 != 0)
