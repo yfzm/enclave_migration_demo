@@ -77,7 +77,7 @@ void dump_out(char *out)
 		heap_size = mheap_pages*PS;
     printf("[heap] target: %p, addr: %p, size: %lx\n", target, addr, heap_size);
 	//memcpy(target, addr, heap_size);
-	memcpy(target, addr, 0x4000000);
+	memcpy(target, addr, 0x10000000);
     //memcpy(target, addr+0x20000000, 0x4000000);
 
 #if 0
