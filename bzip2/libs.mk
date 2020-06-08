@@ -1,7 +1,7 @@
 POPCORN := /usr/local/popcorn
 CC      := $(POPCORN)/bin/clang
 #CFLAGS := -static -fPIC -nodefaultlibs -nostdlib -I./include -Wall -g
-CFLAGS := -O0 -mllvm -optimize-regalloc -Wall -g -popcorn-alignment \
+CFLAGS := -O2 -mllvm -optimize-regalloc -Wall -g -popcorn-alignment \
 	      -Wno-unused-variable -D_GNU_SOURCE -mllvm -no-sm-warn \
 		  -I./include -static -fPIC -nostdlib -nodefaultlibs \
 		  -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64

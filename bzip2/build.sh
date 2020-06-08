@@ -2,6 +2,7 @@
 set -e
 
 APP=main
+#CFLAGS='-I./include -I. -DTIMING_OUTPUT'
 CFLAGS='-I./include -I.'
 
 cmd=${1:-build}
