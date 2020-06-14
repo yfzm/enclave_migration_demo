@@ -22,6 +22,9 @@ bzip2: libs
 perlbench: libs
 	make -C perlbench
 
+mcf: libs
+	make -C mcf
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -30,5 +33,6 @@ clean:
 	make -C multithread clean
 	make -C bzip2 clean
 	make -C perlbench clean
+	make -C mcf clean
 
-.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench
+.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf
