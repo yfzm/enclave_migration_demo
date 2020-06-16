@@ -28,12 +28,19 @@
 // $(pwd)/include
 #include "vars.h"
 
+#define MMAP_RECLAIM
+
 unsigned long __brk = 0 ; //used in migration thread
 unsigned long __init_brk = 0; //used in migration thread
 
 #define MALLOC_AREA_SIZE   0x8000000    // 128 MB
 #define MMAP_AREA_SIZE     0x10000000   // 256 MB
 unsigned long __cur_mmap = 0;
+
+#ifdef MMAP_RECLAIM
+unsigned long __pending_free_addr = 0;
+unsigned long __pending_free_size = 0;
+#endif
 
 //simple spin lock
 /*
@@ -200,10 +207,36 @@ long ocall_syscall2(long n, long a1, long a2)
 
     if (n == SYS_munmap)
     {
-        printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
+        //printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
         if (a1 >= (unsigned long)(&heap_start) + MALLOC_AREA_SIZE &&
                 a1 < (unsigned long)(&heap_start) + MALLOC_AREA_SIZE + MMAP_AREA_SIZE) {
-            printf("[SYS_munmap] skip enclave mmap area\n");
+#ifdef MMAP_RECLAIM
+            if (a1 + a2 == __cur_mmap) {
+                if (__pending_free_addr + __pending_free_size == a1) {
+                    __pending_free_size = 0;
+                    __cur_mmap = __pending_free_addr;
+                    //printf("  [munmap] case 1: reclaim pending\n");
+                } else {
+                    __cur_mmap = a1;
+                    //printf("  [munmap] case 2: reclaim normal\n");
+                }
+            } else {
+                if (__pending_free_addr + __pending_free_size == a1) {
+                    __pending_free_size += a2;
+                    //printf("  [munmap] case 3: merge free below\n");
+                } else if (__pending_free_addr == a1 + a2) {
+                    __pending_free_addr = a1;
+                    __pending_free_size += a2;
+                    //printf("  [munmap] case 4: merge free above\n");
+                } else {
+                    __pending_free_addr = a1;
+                    __pending_free_size = a2;
+                    //printf("  [munmap] case 5: record new\n");
+                }
+            }
+#else
+            //printf("[SYS_munmap] skip enclave mmap area\n");
+#endif
             return 0;
         }
     }
@@ -755,13 +788,19 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
 
     if (n == SYS_mmap)
     {
-        printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
+        //printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
         //printf("__cur_mmap: %p\n", __cur_mmap);
         if (a1 == 0 && a5 == -1) {
             if (__cur_mmap == 0) {
                 __cur_mmap = (unsigned long)(&heap_start) + MALLOC_AREA_SIZE;
             }
             if (__cur_mmap + a2 < (unsigned long)(&heap_start) + MALLOC_AREA_SIZE + MMAP_AREA_SIZE) {
+#ifdef MMAP_RECLAIM
+                if (a2 <= __pending_free_size) {
+                    __pending_free_addr += a2;
+                    return __pending_free_addr - a2;
+                }
+#endif
                 __cur_mmap += a2;
                 return __cur_mmap - a2;
             } else {
