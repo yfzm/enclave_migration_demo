@@ -31,6 +31,9 @@ milc: libs
 lbm: libs
 	make -C lbm
 
+libquantum: libs
+	make -C libquantum
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -42,5 +45,6 @@ clean:
 	make -C mcf clean
 	make -C milc clean
 	make -C lbm clean
+	make -C libquantum clean
 
-.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf milc lbm
+.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf milc lbm libquantum
