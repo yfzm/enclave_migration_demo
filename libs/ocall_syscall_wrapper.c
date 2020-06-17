@@ -34,7 +34,8 @@ unsigned long __brk = 0 ; //used in migration thread
 unsigned long __init_brk = 0; //used in migration thread
 
 #define MALLOC_AREA_SIZE   0x8000000    // 128 MB
-#define MMAP_AREA_SIZE     0x10000000   // 256 MB
+//#define MMAP_AREA_SIZE     0x10000000   // 256 MB
+#define MMAP_AREA_SIZE     0x20000000   // 512 MB
 unsigned long __cur_mmap = 0;
 
 #ifdef MMAP_RECLAIM
@@ -788,7 +789,7 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
 
     if (n == SYS_mmap)
     {
-        //printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
+        printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
         //printf("__cur_mmap: %p\n", __cur_mmap);
         if (a1 == 0 && a5 == -1) {
             if (__cur_mmap == 0) {
