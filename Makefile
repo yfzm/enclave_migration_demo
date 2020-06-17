@@ -28,6 +28,9 @@ mcf: libs
 milc: libs
 	make -C milc
 
+lbm: libs
+	make -C lbm
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -38,5 +41,6 @@ clean:
 	make -C perlbench clean
 	make -C mcf clean
 	make -C milc clean
+	make -C lbm clean
 
-.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf milc
+.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf milc lbm
