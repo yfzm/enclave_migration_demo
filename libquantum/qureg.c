@@ -104,20 +104,20 @@ quantum_matrix2qureg(quantum_matrix *m, int width)
 
 /* Create a new quantum register from scratch */
 
-quantum_reg
+quantum_reg *
 quantum_new_qureg(MAX_UNSIGNED initval, int width)
 {
-  quantum_reg reg;
+  quantum_reg *reg = malloc(sizeof(quantum_reg));
   char *c;
 
-  reg.width = width;
-  reg.size = 1;
-  reg.hashw = width + 2;
+  reg->width = width;
+  reg->size = 1;
+  reg->hashw = width + 2;
 
   /* Allocate memory for 1 base state */
 
-  reg.node = calloc(1, sizeof(quantum_reg_node));
-  if(!reg.node)
+  reg->node = calloc(1, sizeof(quantum_reg_node));
+  if(!reg->node)
     {
       printf("Not enough memory for %i-sized qubit!\n", 1);
       exit(1);
@@ -126,18 +126,18 @@ quantum_new_qureg(MAX_UNSIGNED initval, int width)
 
   /* Allocate the hash table */
 
-  reg.hash = calloc(1 << reg.hashw, sizeof(int));
-  if(!reg.hash)
+  reg->hash = calloc(1 << reg->hashw, sizeof(int));
+  if(!reg->hash)
     {
-      printf("Not enough memory for %i-sized hash!\n", 1 << reg.hashw);
+      printf("Not enough memory for %i-sized hash!\n", 1 << reg->hashw);
       exit(1);
     }
-  quantum_memman((1 << reg.hashw) * sizeof(int));
+  quantum_memman((1 << reg->hashw) * sizeof(int));
 
   /* Initialize the quantum register */
   
-  reg.node[0].state = initval;
-  reg.node[0].amplitude = 1;
+  reg->node[0].state = initval;
+  reg->node[0].amplitude = 1;
 
   /* Initialize the PRNG */
 
@@ -160,15 +160,15 @@ quantum_new_qureg(MAX_UNSIGNED initval, int width)
 /* Convert a quantum register to a vector */
 
 quantum_matrix
-quantum_qureg2matrix(quantum_reg reg)
+quantum_qureg2matrix(quantum_reg *reg)
 {
   quantum_matrix m;
   int i;
 
-  m = quantum_new_matrix(1, 1 << reg.width);
+  m = quantum_new_matrix(1, 1 << reg->width);
   
-  for(i=0; i<reg.size; i++)
-    m.t[reg.node[i].state] = reg.node[i].amplitude;
+  for(i=0; i<reg->size; i++)
+    m.t[reg->node[i].state] = reg->node[i].amplitude;
 
   return m;
 }

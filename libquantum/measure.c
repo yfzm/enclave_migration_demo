@@ -59,7 +59,7 @@ quantum_frand()
 /* Measure the contents of a quantum register */
 
 MAX_UNSIGNED
-quantum_measure(quantum_reg reg)
+quantum_measure(quantum_reg *reg)
 {
   double r;
   int i;
@@ -71,15 +71,15 @@ quantum_measure(quantum_reg reg)
   
   r = quantum_frand();
 
-  for (i=0; i<reg.size; i++)
+  for (i=0; i<reg->size; i++)
     {
       /* If the random number is less than the probability of the
 	 given base state - r, return the base state as the
 	 result. Otherwise, continue with the next base state. */
 
-      r -= quantum_prob_inline(reg.node[i].amplitude);
+      r -= quantum_prob_inline(reg->node[i].amplitude);
       if(0.0 >= r)
-		return reg.node[i].state;
+		return reg->node[i].state;
     }
 
   /* The sum of all probabilities is less than 1. Usually, the cause

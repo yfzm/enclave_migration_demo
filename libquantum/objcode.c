@@ -340,7 +340,7 @@ quantum_objcode_run(char *file, quantum_reg *reg)
 	case INIT:
 	  fread(buf, sizeof(MAX_UNSIGNED), 1, fhd);
 	  mu = quantum_char2mu(buf);
-	  *reg = quantum_new_qureg(mu, 12);
+	  reg = quantum_new_qureg(mu, 12);
 	  break;
 
 	case CNOT:
@@ -430,7 +430,7 @@ quantum_objcode_run(char *file, quantum_reg *reg)
 	  quantum_cond_phase_kick(j, k, d, reg);
 	  break;
 	  
-	case MEASURE: quantum_measure(*reg);
+	case MEASURE: quantum_measure(reg);
 	  break;
 
 	case NOP:

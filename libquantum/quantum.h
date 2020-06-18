@@ -60,7 +60,7 @@ struct quantum_reg_struct
 
 typedef struct quantum_reg_struct quantum_reg;
 
-extern quantum_reg quantum_new_qureg(MAX_UNSIGNED initval, int width);
+extern quantum_reg *quantum_new_qureg(MAX_UNSIGNED initval, int width);
 extern void quantum_delete_qureg(quantum_reg *reg);
 extern void quantum_print_qureg(quantum_reg reg);
 extern void quantum_addscratch(int bits, quantum_reg *reg);
@@ -92,7 +92,7 @@ extern void quantum_qft_inv(int width, quantum_reg *reg);
 extern void quantum_exp_mod_n(int N, int x, int width_input, int width, 
 			      quantum_reg *reg);
 
-extern MAX_UNSIGNED quantum_measure(quantum_reg reg);
+extern MAX_UNSIGNED quantum_measure(quantum_reg *reg);
 extern int quantum_bmeasure(int pos, quantum_reg *reg);
 extern int quantum_bmeasure_bitpreserve(int pos, quantum_reg *reg);
 
@@ -112,7 +112,7 @@ extern void quantum_set_decoherence(float lambda);
 extern void quantum_decohere(quantum_reg *reg);
 
 extern quantum_reg quantum_matrix2qureg(quantum_matrix *m, int width);
-extern quantum_matrix quantum_qureg2matrix(quantum_reg reg);
+extern quantum_matrix quantum_qureg2matrix(quantum_reg *reg);
 
 extern void quantum_qec_encode(int type, int width, quantum_reg *reg);
 extern void quantum_qec_decode(int type, int width, quantum_reg *reg);

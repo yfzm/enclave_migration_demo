@@ -41,9 +41,12 @@
 #include "specrand.h"
 #endif /* SPEC_CPU */
 
+char *aarch64_fn = "./enclave/enclave_aarch64";
+char *x86_64_fn  = "./enclave/enclave_x86_64";
+
 int main(int argc, char **argv) {
 
-  quantum_reg qr;
+  quantum_reg *qr;
   int i;
   int width, swidth;
   int x = 0;
@@ -91,34 +94,32 @@ int main(int argc, char **argv) {
   printf("Random seed: %i\n", x);
 
   qr=quantum_new_qureg(0, width);
-  printf("[yfzm] qr_init: %p (& = %p)\n", qr, &qr);
 
   for(i=0;i<width;i++)
-    quantum_hadamard(i, &qr);
+    quantum_hadamard(i, qr);
 
-  printf("[yfzm] qr[1]: %p (& = %p)\n", qr, &qr);
-  quantum_addscratch(3*swidth+2, &qr);
+  quantum_addscratch(3*swidth+2, qr);
 
-  printf("[yfzm] qr[2]: %p (& = %p)\n", qr, &qr);
-  quantum_exp_mod_n(N, x, width, swidth, &qr);
+    printf("Maybe migrate now! You have 10 seconds!\n");
+    sleep(10);
+    check_migrate(0, 0);
 
-  printf("[yfzm] qr[3]: %p (& = %p)\n", qr, &qr);
+  quantum_exp_mod_n(N, x, width, swidth, qr);
+
   for(i=0;i<3*swidth+2;i++)
     {
-      quantum_bmeasure(0, &qr);
+      quantum_bmeasure(0, qr);
     }
 
-  printf("[yfzm] qr[4]: %p (& = %p)\n", qr, &qr);
-  quantum_qft(width, &qr); 
+  quantum_qft(width, qr); 
   
   for(i=0; i<width/2; i++)
     {
-      quantum_cnot(i, width-i-1, &qr);
-      quantum_cnot(width-i-1, i, &qr);
-      quantum_cnot(i, width-i-1, &qr);
+      quantum_cnot(i, width-i-1, qr);
+      quantum_cnot(width-i-1, i, qr);
+      quantum_cnot(i, width-i-1, qr);
     }
   
-  printf("[yfzm] qr[5]: %p (& = %p)\n", qr, &qr);
   c=quantum_measure(qr);
 
   if(c==-1)
@@ -180,7 +181,7 @@ int main(int argc, char **argv) {
 #endif /* SPEC_CPU */
     }
     
-  quantum_delete_qureg(&qr);
+  quantum_delete_qureg(qr);
 
   /*  printf("Memory leak: %i bytes\n", (int) quantum_memman(0)); */
 
