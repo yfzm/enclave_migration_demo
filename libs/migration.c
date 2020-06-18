@@ -27,6 +27,13 @@ unsigned long mthread_pages = 0;
 void set_migration_flag()
 {
     migration_flag = 1;
+            printf(" > before touching target area\n");
+//            unsigned long ff = 0;
+//            for (void *yy = (void *)0x600000c00000; yy < (void *)0x600028c00000; yy += 0x1000) {
+//                ff += (unsigned long)yy;
+//            }
+            memset((void *)0x600000c00000, 0, 0x28000000);
+            printf(" > after tourching target area.\n");
 }
 
 void dump_out(char *out)
@@ -76,8 +83,37 @@ void dump_out(char *out)
 	if(heap_size > (mheap_pages*PS))
 		heap_size = mheap_pages*PS;
     printf("[heap] target: %p, addr: %p, size: %lx\n", target, addr, heap_size);
+            printf(" > before touching area\n");
+            unsigned long ff = 0;
+            for (unsigned long ii = 0; ii < 0x28000000; ++ii) {
+                ff += *(char *)(addr + ii);
+            }
+            //for (void *yy = (void *)0x40c00000; yy < (void *)0x68c00000; yy += 0x1000) {
+            //    ff += (unsigned long)yy;
+            //}
+            printf(" > after tourching area %lu\n", ff);
+            printf(" > before touching target area\n");
+            //ff = 0;
+            //for (void *yy = (void *)0x600000c00000; yy < (void *)0x600028c00000; yy += 0x1000) {
+            //    ff += (unsigned long)yy;
+            //}
+            for (unsigned long ii = 0; ii < 0x28000000; ++ii) {
+                *(char *)(target + ii) = 0;
+            }
+            //memset(target, 0, 0x28000000);
+            
+            printf(" > after tourching target area %lu\n", ff);
 	//memcpy(target, addr, heap_size);
-	memcpy(target, addr, 0x28000000);
+	//memcpy(target, addr, 0x28000000);
+	//memmove(target, addr, 0x28000000);
+    for (unsigned long ii = 0; ii < 0x28000000; ++ii) {
+        *(char *)(target + ii) = *(char *)(addr + ii);
+        if (ii % 1000 == 0) {
+            printf("ii: %lu\n", ii);
+        }
+    }
+    printf("Done.\n");
+    printf("[heap after] target: %p, addr: %p, size: %lx\n", target, addr, heap_size);
     //memcpy(target, addr+0x20000000, 0x4000000);
 
 #if 0

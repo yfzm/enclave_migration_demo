@@ -41,6 +41,7 @@ unsigned long __cur_mmap = 0;
 #ifdef MMAP_RECLAIM
 unsigned long __pending_free_addr = 0;
 unsigned long __pending_free_size = 0;
+extern int migration_flag;
 #endif
 
 //simple spin lock
@@ -208,7 +209,7 @@ long ocall_syscall2(long n, long a1, long a2)
 
     if (n == SYS_munmap)
     {
-        //printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
+        printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
         if (a1 >= (unsigned long)(&heap_start) + MALLOC_AREA_SIZE &&
                 a1 < (unsigned long)(&heap_start) + MALLOC_AREA_SIZE + MMAP_AREA_SIZE) {
 #ifdef MMAP_RECLAIM
@@ -216,27 +217,43 @@ long ocall_syscall2(long n, long a1, long a2)
                 if (__pending_free_addr + __pending_free_size == a1) {
                     __pending_free_size = 0;
                     __cur_mmap = __pending_free_addr;
-                    //printf("  [munmap] case 1: reclaim pending\n");
+                    printf("  [munmap] case 1: reclaim pending\n");
+                    printf("    pending [0x%lx, 0x%lx] 0x%lx\n", __pending_free_addr, __pending_free_addr + __pending_free_size, __pending_free_size);
                 } else {
                     __cur_mmap = a1;
-                    //printf("  [munmap] case 2: reclaim normal\n");
+                    printf("  [munmap] case 2: reclaim normal\n");
+                    printf("    pending [0x%lx, 0x%lx] 0x%lx\n", __pending_free_addr, __pending_free_addr + __pending_free_size, __pending_free_size);
                 }
             } else {
                 if (__pending_free_addr + __pending_free_size == a1) {
                     __pending_free_size += a2;
-                    //printf("  [munmap] case 3: merge free below\n");
+                    printf("  [munmap] case 3: merge free below\n");
+                    printf("    pending [0x%lx, 0x%lx] 0x%lx\n", __pending_free_addr, __pending_free_addr + __pending_free_size, __pending_free_size);
                 } else if (__pending_free_addr == a1 + a2) {
                     __pending_free_addr = a1;
                     __pending_free_size += a2;
-                    //printf("  [munmap] case 4: merge free above\n");
+                    printf("  [munmap] case 4: merge free above\n");
+                    printf("    pending [0x%lx, 0x%lx] 0x%lx\n", __pending_free_addr, __pending_free_addr + __pending_free_size, __pending_free_size);
                 } else {
                     __pending_free_addr = a1;
                     __pending_free_size = a2;
-                    //printf("  [munmap] case 5: record new\n");
+                    printf("  [munmap] case 5: record new\n");
+                    printf("    pending [0x%lx, 0x%lx] 0x%lx\n", __pending_free_addr, __pending_free_addr + __pending_free_size, __pending_free_size);
                 }
             }
+
+	        //memcpy((void *)0x600000c00000, (void *)0x40c00000, 0x28000000);
+            printf(" > before touching area\n");
+            unsigned long ff = 0;
+            for (unsigned long ii = 0; ii < 0x28000000; ++ii) {
+                ff += *(char *)(0x40c00000 + ii);
+            }
+            //for (void *yy = (void *)0x40c00000; yy < (void *)0x68c00000; yy += 0x1000) {
+            //    ff += (unsigned long)yy;
+            //}
+            printf(" > after tourching area %lu\n", ff);
 #else
-            //printf("[SYS_munmap] skip enclave mmap area\n");
+            printf("  [munmap] skip enclave mmap area\n");
 #endif
             return 0;
         }
@@ -799,10 +816,13 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
 #ifdef MMAP_RECLAIM
                 if (a2 <= __pending_free_size) {
                     __pending_free_addr += a2;
+                    __pending_free_size -= a2;
+                    printf("  [map] use free, [0x%x, 0x%x]\n", __pending_free_addr - a2, __pending_free_addr);
                     return __pending_free_addr - a2;
                 }
 #endif
                 __cur_mmap += a2;
+                printf("  [map] use new, [0x%x, 0x%x]\n", __cur_mmap - a2, __cur_mmap);
                 return __cur_mmap - a2;
             } else {
                 printf("[SYS_mmap] Error: exceed mmap area!\n");
