@@ -227,9 +227,9 @@ long ocall_syscall2(long n, long a1, long a2)
 #ifdef MMAP_RECLAIM
                 if (a1 + a2 == __cur_mmap) {
                     if (__pending_free_addr + __pending_free_size == a1) {
+                        __cur_mmap = __pending_free_addr;
 						__pending_free_addr = 0;
                         __pending_free_size = 0;
-                        __cur_mmap = __pending_free_addr;
                         yfzm_printf("  [munmap] case 1: reclaim pending\n");
                     } else {
                         __cur_mmap = a1;
