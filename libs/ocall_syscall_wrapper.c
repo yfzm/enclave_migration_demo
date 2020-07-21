@@ -24,6 +24,7 @@
 #include "sys/epoll.h"
 #include "fcntl.h"
 #include "sys/file.h"
+#include "assert.h"
 
 // $(pwd)/include
 #include "vars.h"
@@ -36,9 +37,6 @@ extern unsigned long enclave_start;
 unsigned long __brk = 0 ; //used in migration thread
 unsigned long __init_brk = 0; //used in migration thread
 
-#define MALLOC_AREA_SIZE   0x8000000    // 128 MB
-//#define MMAP_AREA_SIZE     0x10000000   // 256 MB
-#define MMAP_AREA_SIZE     0x20000000   // 512 MB
 unsigned long __cur_mmap = 0;
 
 #ifdef MMAP_RECLAIM
@@ -218,6 +216,10 @@ long ocall_syscall2(long n, long a1, long a2)
     if (n == SYS_munmap)
     {
         yfzm_printf("[SYS_munmap] addr %p, len 0x%lx\n", a1, a2);
+		if ((unsigned long)a1 > 0xffff00000000) {
+			printf("Error!\n");
+			assert(0);
+		}
         if ((a1 >= (unsigned long)&enclave_start) && (a1 < (unsigned long)&enclave_start + 0x40000000)) {
 
             if ((a1 >= (unsigned long)(&heap_start) + MALLOC_AREA_SIZE) &&
@@ -225,6 +227,7 @@ long ocall_syscall2(long n, long a1, long a2)
 #ifdef MMAP_RECLAIM
                 if (a1 + a2 == __cur_mmap) {
                     if (__pending_free_addr + __pending_free_size == a1) {
+						__pending_free_addr = 0;
                         __pending_free_size = 0;
                         __cur_mmap = __pending_free_addr;
                         yfzm_printf("  [munmap] case 1: reclaim pending\n");
@@ -807,7 +810,7 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
     if (n == SYS_mmap)
     {
         yfzm_printf("[SYS_mmap] addr %p, len 0x%lx, prot %d, flags %d, fd %d, offset %lu\n", a1, a2, a3, a4, a5, a6);
-        yfzm_printf("__cur_mmap: %p\n", __cur_mmap);
+        yfzm_printf("  __cur_mmap: %p\n", __cur_mmap);
         if (a1 == 0 && a5 == -1) {
             if (__cur_mmap == 0) {
                 __cur_mmap = (unsigned long)(&heap_start) + MALLOC_AREA_SIZE;
@@ -817,13 +820,16 @@ long ocall_syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6
                 if (a2 <= __pending_free_size) {
                     __pending_free_addr += a2;
                     __pending_free_size -= a2;
+					yfzm_printf("  [use reclaimed] %p\n", __pending_free_addr - a2);
                     return __pending_free_addr - a2;
                 }
 #endif
                 __cur_mmap += a2;
+				yfzm_printf("  [use new] %p\n", __cur_mmap - a2);
                 return __cur_mmap - a2;
             } else {
                 printf("[SYS_mmap] Error: exceed mmap area!\n");
+				assert(0);
                 exit(1);
             }
         }
