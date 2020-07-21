@@ -31,14 +31,12 @@ int main(int argc, char* argv[])
 #else
     int msg_cnt = 0;
 	printf("This is the No.%d message from the app\n", ++msg_cnt);
-    //migration_flag = 1;
-    // migrate(1, 0, 0);
     while (1) {
-        check_migrate(0, 0);
+        check_migrate(1, 0);
+		// if (msg_cnt == 4) migrate(0, 0, 0);
 		printf("This is the No.%d message from the app\n", ++msg_cnt);
 		sleep(1);
     }
-    //write(1, "Hello World!\n", 13);
 #endif
 	return 0;
 }

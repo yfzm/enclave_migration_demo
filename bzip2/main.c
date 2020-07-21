@@ -336,11 +336,14 @@ int main (int argc, char *argv[]) {
 
     spec_initbufs();
 
-    printf("Maybe migrate now! You have 10 seconds!\n");
-    sleep(10);
-    check_migrate(0, 0);
+    //printf("Maybe migrate now! You have 10 seconds!\n");
+    //sleep(10);
+    //check_migrate(0, 0);
 
     for (level=5; level <= 9; level += 2) {
+		if (level == 7) {
+			check_migrate(1, 0);
+		}
         debug_time();
         debug1(2, "Compressing Input Data, level %d\n", level);
 

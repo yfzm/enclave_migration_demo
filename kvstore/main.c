@@ -151,7 +151,7 @@ int main(int argc,char **argv)
 #if 1
 	for(;;){
         sleep(5);
-        check_migrate(0, 0);
+        check_migrate(1, 0);
 		fputs("vedis>",stdout);
         fflush(stdout);
 		zPtr = fgets(zBuf,sizeof(zBuf),stdin);

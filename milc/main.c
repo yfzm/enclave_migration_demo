@@ -44,7 +44,7 @@ int main( int argc, char **argv ){
 
     printf("Maybe migrate now! You have 10 seconds!\n");
     sleep(10);
-    check_migrate(0, 0);
+    check_migrate(1, 0);
 
     printf("[yfzm] [after ] lattice: %p, &lattice: %p\n", lattice, &lattice);
 

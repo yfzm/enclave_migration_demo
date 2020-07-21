@@ -41,7 +41,7 @@ int main( int nArgs, char* arg[] ) {
 
     printf("Maybe migrate now! You have 10 seconds!\n");
     sleep(10);
-    check_migrate(0, 0);
+    check_migrate(1, 0);
 
 	for( t = 1; t <= param.nTimeSteps; t++ ) {
 		if( param.simType == CHANNEL ) {
