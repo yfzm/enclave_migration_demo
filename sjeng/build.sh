@@ -62,7 +62,7 @@ build() {
     make -C ../libs
 
     # Generate *.o
-    $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
+    $popcorn_bin/clang $CFLAGS -O0 -popcorn-migratable -c ${APP}.c
 
     echo "Link (1/2) generate map files"
     # Generate map.txt

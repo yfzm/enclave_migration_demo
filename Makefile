@@ -34,6 +34,12 @@ lbm: libs
 libquantum: libs
 	make -C libquantum
 
+sjeng: libs
+	make -C sjeng
+
+hmmer: libs
+	make -C hmmer
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -46,5 +52,8 @@ clean:
 	make -C milc clean
 	make -C lbm clean
 	make -C libquantum clean
+	make -C sjeng clean
+	make -C hmmer clean
 
-.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 perlbench mcf milc lbm libquantum
+.PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 \
+	perlbench mcf milc lbm libquantum sjeng hmmer

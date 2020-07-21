@@ -4,6 +4,9 @@ all: libs
 clean: libs_clean
 	@./build.sh clean
 
+native: libs
+	@./build.sh native
+
 include libs.mk
 
-.PHONY: all clean
+.PHONY: all clean native

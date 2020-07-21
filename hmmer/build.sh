@@ -12,8 +12,7 @@ popcorn_bin="$popcorn_path/bin"
 lib_build_path="../build"
 lib_build_path_escaped=$(echo $lib_build_path | sed "s/\//\\\\\//g")
 
-LIBS="alphabet.o core_algorithms.o debug.o display.o emit.o emulation.o fast_algorithms.o histogram.o hmmio.o hmmcalibrate.o mathsupport.o masks.o misc.o modelmakers.o plan7.o plan9.o postprob.o prior.o tophits.o trace.o ucbqsort.o a2m.o aligneval.o alignio.o clustal.o cluster.o dayhoff.o eps.o file.o getopt.o gki.o gsi.o hsregex.o iupac.o msa.o msf.o phylip.o revcomp.o rk.o selex.o seqencode.o shuffle.o sqerror.o sqio.o squidcore.o sre_ctype.o sre_math.o sre_random.o sre_string.o ssi.o stack.o
-stockholm.o translate.o types.o vectorops.o weight.o"
+LIBS="alphabet.o core_algorithms.o debug.o display.o emit.o emulation.o fast_algorithms.o histogram.o hmmio.o hmmcalibrate.o mathsupport.o masks.o misc.o modelmakers.o plan7.o plan9.o postprob.o prior.o tophits.o trace.o ucbqsort.o a2m.o aligneval.o alignio.o clustal.o cluster.o dayhoff.o eps.o file.o getopt.o gki.o gsi.o hsregex.o iupac.o msa.o msf.o phylip.o revcomp.o rk.o selex.o seqencode.o shuffle.o sqerror.o sqio.o squidcore.o sre_ctype.o sre_math.o sre_random.o sre_string.o ssi.o stack.o stockholm.o translate.o types.o vectorops.o weight.o"
 
 
 x86_objs="
@@ -63,7 +62,7 @@ build() {
     make -C ../libs
 
     # Generate *.o
-    $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
+    $popcorn_bin/clang $CFLAGS -O0 -popcorn-migratable -c ${APP}.c
 
     echo "Link (1/2) generate map files"
     # Generate map.txt
@@ -120,6 +119,10 @@ relink() {
             $x86_objs \
             --start-group -lgcc -lgcc_eh --end-group
     $popcorn_bin/gen-stackinfo -f final_${APP}_x86_64
+}
+
+native() {
+	gcc main.c $(echo "$LIBS" | sed "s/[^ ]* */${lib_build_path_escaped}\/x86_64\/&/g") -o main_native -lm
 }
 
 $cmd

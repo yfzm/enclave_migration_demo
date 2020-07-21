@@ -86,6 +86,27 @@
 #include "structs.h"
 #include "funcs.h"
 
+#define fgets(buf, size, f) yfzm_fgets(buf, size, f)
+
+char *yfzm_fgets(char *s, int size, FILE *stream) {
+	int fd = fileno(stream);
+	// printf("Hello there! fd=%d\n", fd);
+	int index = 0;
+	unsigned char c;
+	while (index < size - 1 && read(fd, &c, 1) != 0) {
+		s[index] = c;
+		++index;
+		if (c == '\n') break;
+	}
+	if (index > 0) {
+		s[index]='\0';
+	} else {
+		printf("read error!\n");
+		return NULL;
+	}
+	return s;
+}
+
 
 /* Magic numbers identifying binary formats.
  * Do not change the old magics! Necessary for backwards compatibility.
@@ -221,6 +242,7 @@ HMMFileOpen(char *hmmfile, char *env)
   }
   rewind(hmmfp->f);
 
+  printf("[yfzm] magic: %x\n", magic);
   if (magic == v20magic) { 
     hmmfp->parser    = read_bin20hmm;
     hmmfp->is_binary = TRUE;
@@ -562,7 +584,6 @@ WriteBinHMM(FILE *fp, struct plan7_s *hmm)
  *   way to handle errors.
  * 
  *****************************************************************/
-
 static int
 read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm) 
 {
@@ -772,6 +793,7 @@ read_asc20hmm(HMMFILE *hmmfp, struct plan7_s **ret_hmm)
   return 1;
 
 FAILURE:
+  printf("[yfzm] Failure?\n");
   if (hmm  != NULL) FreePlan7(hmm);
   *ret_hmm = NULL;
   return 1;

@@ -3,6 +3,7 @@ build/
 
 tags
 
+*.swp
 *.o
 *.x
 *.txt
@@ -14,4 +15,5 @@ tmp*
 *_aarch64
 *.asm
 asm
+*.bk
 

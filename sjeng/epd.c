@@ -295,49 +295,4 @@ void run_epd_testsuite(void)
   printf("\n");
 }
 
-void run_autotest(char *testset)
-{
-	FILE *testsuite;
-	char readbuff[STR_BUFF];
-        int searchdepth;
-	rtime_t start, end;
-	
-	move_s comp_move;
-
-	testsuite = fopen(testset, "r");
-
-	if (testsuite == NULL) exit(EXIT_FAILURE);
-
-	start = rtime();
-	
-	while (fgets(readbuff, STR_BUFF, testsuite) != NULL)
- 	{
-		setup_epd_line(readbuff);
-                root_to_move = ToMove;
-					        
-		clear_tt();
-		initialize_hash();
-		           
-		printf("\n");
-		display_board(stdout, 1);
-
-		printf("EPD: %s\n", readbuff);
-
-		if (fgets(readbuff, STR_BUFF, testsuite) == NULL) exit(EXIT_FAILURE);
-		searchdepth = atoi(readbuff);
-		
-		printf("Searching to %d ply\n", searchdepth);
-		maxdepth = searchdepth;
-
-		fixed_time = INF;
-		comp_move = think();
-	}
-		
-	end = rtime();
-/*        printf("Total elapsed: %i.%02i seconds\n", rdifftime(end, start)/100,
-			                           rdifftime(end, start)%100);
-*/
-	fclose(testsuite);
-	exit(EXIT_SUCCESS);
-}
 
