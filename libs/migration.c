@@ -74,7 +74,8 @@ void dump_out(char *out)
 	//store metadata (used in sdk/client.c)
 	*(unsigned long *)(METADATA_ADDR) = N_THREADS;
 
-	printf("total dumpped size: %lx bytes\n", data_size + malloc_size + mmap_size + stack_size + 3 * N_THREADS * PS);
+	unsigned long total_size = data_size + malloc_size + mmap_size + stack_size + 3 * N_THREADS * PS;
+	printf("total dumpped size: 0x%lx bytes (%f MB)\n", total_size, total_size / 1024.0 / 1024.0);
 	
 	//dump data section
 	offset = PS * mcode_pages;
