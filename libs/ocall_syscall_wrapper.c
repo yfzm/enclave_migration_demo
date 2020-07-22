@@ -30,7 +30,7 @@
 #include "vars.h"
 
 #define MMAP_RECLAIM
-#define MMAP_DEBUG
+//#define MMAP_DEBUG
 
 extern unsigned long enclave_start;
 
@@ -136,7 +136,7 @@ long ocall_syscall1(long n, long a1)
 	//size of enclave should at least be 0x8000.
 	if(n == SYS_brk) // 12
 	{
-        printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
+        yfzm_printf("[SYS_brk] a1=%p, __brk=%p(%p)\n", a1, __brk, &__brk);  //yfzm
 		if(a1 == 0) //ask the start of heap
 		{
 			__init_brk = (long)&heap_start;
