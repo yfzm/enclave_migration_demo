@@ -65,11 +65,11 @@ void set_migration_flag()
 }
 
 void set_metadata(int type, unsigned long offset, unsigned long size) {
-	int base = 8 + type * 16;
+	unsigned long base = METADATA_ADDR + 8;
 	offsets[type] = offset;
 	sizes[type] = size;
-	*(unsigned long *)(METADATA_ADDR + base) = offset;
-	*(unsigned long *)(METADATA_ADDR + base + 8) = size;
+	*(unsigned long *)(base + 8 * type) = offset;
+	*(unsigned long *)(base + 8 * type + 40) = size;
 }
 
 void dump_out_init() {

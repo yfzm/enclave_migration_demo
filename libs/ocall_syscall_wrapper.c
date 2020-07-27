@@ -83,12 +83,18 @@ void ocall_debug(long a1)
 	ocall_syscall();
 }
 
-void ocall_senddata()
+// a1: size, 0 for initialization
+long ocall_senddata(long a1)
 {
+	long ret;
     unsigned long *ptr;
     ptr = (unsigned long *)outside_buffer;
     *ptr = 9;
+	*(ptr+1) = a1;
     ocall_syscall();
+	ret = *ptr;
+//	printf("[syscall_wrapper] senddata ret %ld\n", ret);
+	return ret;
 }
 
 long ocall_syscall0(long n)
