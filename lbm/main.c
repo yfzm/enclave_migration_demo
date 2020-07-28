@@ -39,11 +39,13 @@ int main( int nArgs, char* arg[] ) {
 	MAIN_startClock( &time );
 #endif
 
-    printf("Maybe migrate now! You have 10 seconds!\n");
-    sleep(10);
-    check_migrate(1, 0);
+    //printf("Maybe migrate now! You have 10 seconds!\n");
+    //sleep(10);
+    //check_migrate(1, 0);
 
 	for( t = 1; t <= param.nTimeSteps; t++ ) {
+		if (t == 2)
+			check_migrate(1, 0);
 		if( param.simType == CHANNEL ) {
 			LBM_handleInOutFlow( *srcGrid );
 		}
