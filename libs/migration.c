@@ -17,6 +17,7 @@ extern unsigned long __init_brk, __brk;
 extern unsigned long __cur_mmap;
 extern unsigned long init_stack_1;
 extern int migration_flag;
+extern int running_thread_num;  // defined in trampo.c
 
 unsigned long mcode_pages = 0;
 unsigned long mdata_pages = 0;
@@ -74,6 +75,7 @@ void set_metadata(int type, unsigned long offset, unsigned long size) {
 
 void dump_out_init() {
 	yfzm_printf("[dump_out_init]\n");
+	int n_threads = running_thread_num - 1;  // exclude helper thread
 	char *addr;
 	char *target;
 	unsigned long i;
@@ -86,12 +88,12 @@ void dump_out_init() {
     data_size = 0x800000;  // 8MB
 	malloc_size = __brk - __init_brk;
 	mmap_size = __cur_mmap - __init_brk - MALLOC_AREA_SIZE;
-	stack_size = 0x800000 * N_THREADS;
-	thread_size = 3 * N_THREADS * PS;
+	stack_size = 0x800000 * n_threads;
+	thread_size = 3 * n_threads * PS;
 	
 	//store metadata (used in sdk/client.c)
 	offset = 0;
-	*(unsigned long *)(METADATA_ADDR) = N_THREADS;
+	*(unsigned long *)(METADATA_ADDR) = n_threads;
 	offset += PS * mcode_pages;
 	set_metadata(METADATA_DATA, offset, data_size);
 	offset += PS * mdata_pages;
@@ -189,8 +191,8 @@ int dump_out(char *out, unsigned long size)
 	//offset = PS * (mcode_pages + mdata_pages + mheap_pages + mstack_pages);
 	//addr = (char*)(enclave_start_addr + offset);
 	//target = out + offset;
-	//set_metadata(METADATA_THREAD, offset, 3 * N_THREADS * PS);
-	//for(i = 0; i < 3 * N_THREADS; ++i, addr += PS, target += PS) {
+	//set_metadata(METADATA_THREAD, offset, 3 * n_threads * PS);
+	//for(i = 0; i < 3 * n_threads; ++i, addr += PS, target += PS) {
 	//	if(i % 3 != 0)
 	//		memcpy(target, addr, PS);
 	//	else

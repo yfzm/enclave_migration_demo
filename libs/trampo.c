@@ -19,6 +19,8 @@ int main(int argc, char* argv[]);
 void set_migration_flag();
 void dump_out(char *out);
 
+int running_thread_num = 0;
+
 void trampoline(long function_choice, unsigned long arg)
 {
 	unsigned long *ptr;
@@ -47,6 +49,9 @@ void trampoline(long function_choice, unsigned long arg)
             set_migration_flag();
 			//dump_out((char*)arg);
 			break;
+		case SPIN:
+			printf("SPIN thread added\n");
+			while (1) { sleep(10); }
 		//default: new thread
 		default:
 		{

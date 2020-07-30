@@ -25,4 +25,6 @@
 #define INIT_SYSCALL 0x0
 #define TEST_ECALL 0x1
 
+#define SPIN 0x1223
+
 #endif

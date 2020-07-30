@@ -30,6 +30,9 @@ extern unsigned long mthread_pages;
 extern int migration_ready[16];
 //extern int *migration_ready;
 
+//defined in trampo.c
+extern int running_thread_num;
+
 static inline bool is_out_enclave(unsigned long addr)
 {
 	if((addr < (unsigned long)&enclave_start) || (addr > (unsigned long)&enclave_end))
@@ -56,6 +59,7 @@ void init_syscall(unsigned long *args_buffer)
 
 	etid = *(args_buffer + 3);
     migration_ready[etid] = 1;  // 0: void, 1: normal
+	running_thread_num += 1;
 	if(etid == 0)
 	{
 		//trampoline outside the enclave

@@ -14,7 +14,7 @@ extern unsigned long heap_end;
 
 #define MALLOC_AREA_SIZE   0x8000000    // 128 MB
 #define MMAP_AREA_SIZE     0x20000000   // 512 MB
-#define N_THREADS 1
+//#define N_THREADS 2
 
 struct fd_info {
     char path[MAX_PATH_LEN];
