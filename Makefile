@@ -43,6 +43,9 @@ hmmer: libs
 vedis: libs
 	make -C vedis
 
+mvedis: libs
+	make -C mvedis
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -58,6 +61,7 @@ clean:
 	make -C sjeng clean
 	make -C hmmer clean
 	make -C vedis clean
+	make -C mvedis clean
 
 .PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 \
-	perlbench mcf milc lbm libquantum sjeng hmmer vedis
+	perlbench mcf milc lbm libquantum sjeng hmmer vedis mvedis
