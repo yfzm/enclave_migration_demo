@@ -12,8 +12,8 @@
 #endif
 #include "spec.h"
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/bzip2_aarch64";
+char *x86_64_fn  = "./enclave/bzip2_x86_64";
 
 #define SPEC_CPU
 #define SPEC_BZIP
@@ -336,14 +336,12 @@ int main (int argc, char *argv[]) {
 
     spec_initbufs();
 
-    //printf("Maybe migrate now! You have 10 seconds!\n");
-    //sleep(10);
-    //check_migrate(0, 0);
-
     for (level=5; level <= 9; level += 2) {
+#ifndef NO_MIGRATION
 		if (level == 7) {
 			check_migrate(1, 0);
 		}
+#endif
         debug_time();
         debug1(2, "Compressing Input Data, level %d\n", level);
 
