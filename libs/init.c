@@ -27,7 +27,7 @@ extern unsigned long mstack_pages;
 extern unsigned long mthread_pages;
 
 //defined in popcorn-comiler/migrate.c
-extern int migration_ready[16];
+int __attribute__((weak)) migration_ready[16] = {0};
 //extern int *migration_ready;
 
 //defined in trampo.c

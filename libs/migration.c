@@ -16,7 +16,7 @@ extern unsigned long enclave_start;
 extern unsigned long __init_brk, __brk;
 extern unsigned long __cur_mmap;
 extern unsigned long init_stack_1;
-extern int migration_flag;
+int __attribute__((weak)) migration_flag;
 extern int running_thread_num;  // defined in trampo.c
 
 unsigned long mcode_pages = 0;

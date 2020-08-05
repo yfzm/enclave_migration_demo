@@ -37,7 +37,9 @@ int main(int argc, char* argv[])
     int msg_cnt = 0;
 	printf("This is the No.%d message from the app\n", ++msg_cnt);
     while (1) {
+#ifndef NO_MIGRATION
         check_migrate(1, 0);
+#endif
 		if (msg_cnt == 10) return 0; 
 		printf("This is the No.%d message from the app\n", ++msg_cnt);
 		sleep(1);
