@@ -150,7 +150,7 @@ int main(int argc,char **argv)
 
 #if 1
 	for(;;){
-        sleep(5);
+        sleep(3);
         check_migrate(1, 0);
 		fputs("vedis>",stdout);
         fflush(stdout);

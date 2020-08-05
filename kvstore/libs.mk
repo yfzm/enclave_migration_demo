@@ -4,12 +4,11 @@ CC      := $(POPCORN)/bin/clang
 CFLAGS := -O2 -mllvm -optimize-regalloc -Wall -g -popcorn-alignment \
 	      -Wno-unused-variable -D_GNU_SOURCE -mllvm -no-sm-warn \
 		  -I./include -static -fPIC -nostdlib -nodefaultlibs \
-		  -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64 -DVEDIS_ENABLE_THREADS \
-		  -lpthread
+		  -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64 
 lds := linker.lds
 
 LIB_HDR := $(shell ls *.h)
-LIBS    := mvedis.o
+LIBS    := vedis.o
 BUILD_PATH := ../build
 
 

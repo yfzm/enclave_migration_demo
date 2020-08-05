@@ -1,7 +1,9 @@
-all:
+all: libs
 	@./build.sh
 
-clean:
+clean: libs_clean
 	@./build.sh clean
+
+include libs.mk
 
 .PHONY: all clean

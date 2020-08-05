@@ -12,7 +12,7 @@ popcorn_bin="$popcorn_path/bin"
 lib_build_path="../build"
 lib_build_path_escaped=$(echo $lib_build_path | sed "s/\//\\\\\//g")
 
-LIBS="vedis.o"
+LIBS="mvedis.o"
 
 
 x86_objs="

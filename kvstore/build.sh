@@ -2,25 +2,30 @@
 set -e
 
 APP=main
-CFLAGS='-I../libs/include'
+#CFLAGS='-I./include -I. -DTIMING_OUTPUT'
+CFLAGS="-I./include -I. -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64"
 
 cmd=${1:-build}
 
 popcorn_path="/usr/local/popcorn"
 popcorn_bin="$popcorn_path/bin"
 lib_build_path="../build"
+lib_build_path_escaped=$(echo $lib_build_path | sed "s/\//\\\\\//g")
+
+LIBS="vedis.o"
+
 
 x86_objs="
     ${lib_build_path}/x86_64/stub.o
     ${lib_build_path}/x86_64/ocall_syscall.o
     ${lib_build_path}/x86_64/trampo.o
     ${APP}_x86_64.o
+    $(echo "$LIBS" | sed "s/[^ ]* */${lib_build_path_escaped}\/x86_64\/&/g")
     ${lib_build_path}/x86_64/init.o
     ${lib_build_path}/x86_64/enclave_tls.o
     ${lib_build_path}/x86_64/ocall_libcall_wrapper.o
     ${lib_build_path}/x86_64/ocall_syscall_wrapper.o
     ${lib_build_path}/x86_64/migration.o
-    ${lib_build_path}/x86_64/vedis.o
     $popcorn_path/x86_64/lib/crt1.o
     $popcorn_path/x86_64/lib/libc.a
     $popcorn_path/x86_64/lib/libmigrate.a
@@ -30,17 +35,18 @@ x86_objs="
     $popcorn_path/x86_64/lib/libpthread.a
 "
 
+
 arm_objs="
     ${lib_build_path}/aarch64/stub.o
     ${lib_build_path}/aarch64/ocall_syscall.o
     ${lib_build_path}/aarch64/trampo.o
     ${APP}_aarch64.o
+    $(echo "$LIBS" | sed "s/[^ ]* */${lib_build_path_escaped}\/aarch64\/&/g")
     ${lib_build_path}/aarch64/init.o
     ${lib_build_path}/aarch64/enclave_tls.o
     ${lib_build_path}/aarch64/ocall_libcall_wrapper.o
     ${lib_build_path}/aarch64/ocall_syscall_wrapper.o
     ${lib_build_path}/aarch64/migration.o
-    ${lib_build_path}/aarch64/vedis.o
     $popcorn_path/aarch64/lib/crt1.o
     $popcorn_path/aarch64/lib/libc.a
     $popcorn_path/aarch64/lib/libmigrate.a
@@ -50,9 +56,10 @@ arm_objs="
     $popcorn_path/aarch64/lib/libpthread.a
 "
 
+
 build() {
     # Make libs
-    make -C ../libs EXTRA_LIBS=vedis.o
+    make -C ../libs
 
     # Generate *.o
     $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
