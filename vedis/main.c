@@ -11,8 +11,8 @@ static int DataConsumerCallback(const void *pData,unsigned int nDatalen,void *pU
 #define MAX_RECORDS 10000000
 #define INSERT_RATIO 5
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/vedis_aarch64";
+char *x86_64_fn  = "./enclave/vedis_x86_64";
 
 int main(int argc,char *argv[])
 {
@@ -42,8 +42,10 @@ int main(int argc,char *argv[])
 	
 	/* Start the random insertions */
 	for( i = 0 ; i < records_num; ++i ){
+#ifndef NO_MIGRATION
 		if (i % 100000 == 0)
 			check_migrate(1, 0);
+#endif
 		
 		/* Genearte the random key first */
 		vedis_util_random_string(pStore,zKey,sizeof(zKey));
