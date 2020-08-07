@@ -22,8 +22,8 @@ static LBM_GridPtr srcGrid, dstGrid;
 
 /*############################################################################*/
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/lbm_aarch64";
+char *x86_64_fn  = "./enclave/lbm_x86_64";
 
 int main( int nArgs, char* arg[] ) {
 	MAIN_Param param;
@@ -39,13 +39,10 @@ int main( int nArgs, char* arg[] ) {
 	MAIN_startClock( &time );
 #endif
 
-    //printf("Maybe migrate now! You have 10 seconds!\n");
-    //sleep(10);
-    //check_migrate(1, 0);
-
 	for( t = 1; t <= param.nTimeSteps; t++ ) {
-		if (t == 2)
-			check_migrate(1, 0);
+#ifndef NO_MIGRATION
+		check_migrate(1, 0);
+#endif
 		if( param.simType == CHANNEL ) {
 			LBM_handleInOutFlow( *srcGrid );
 		}

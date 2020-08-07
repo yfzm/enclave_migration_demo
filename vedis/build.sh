@@ -3,7 +3,7 @@ set -e
 
 APP=main
 #CFLAGS='-I./include -I. -DTIMING_OUTPUT'
-CFLAGS="-I./include -I. -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64"
+CFLAGS="-I./include -I. -O2 -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64"
 
 cmd=${1:-build}
 
@@ -55,7 +55,7 @@ build() {
     make -C ../libs
 
     # Generate *.o
-    $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
+    $popcorn_bin/clang $CFLAGS -popcorn-migratable -c ${APP}.c
 
     echo "Link (1/2) generate map files"
     # Generate map.txt

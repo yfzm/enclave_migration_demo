@@ -3,7 +3,7 @@ set -e
 
 APP=main
 #CFLAGS='-I./include -I. -DTIMING_OUTPUT'
-CFLAGS="-I./include -I. -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64"
+CFLAGS="-I./include -I. -O2 -DSPEC_CPU -DNDEBUG -DSPEC_CPU_LP64"
 
 cmd=${1:-build}
 
@@ -14,8 +14,13 @@ lib_build_path_escaped=$(echo $lib_build_path | sed "s/\//\\\\\//g")
 
 LIBS="lbm.o"
 
+lib_popcorn_path_escaped=$(echo $popcorn_path | sed "s/\//\\\\\//g")
 
-x86_objs="
+popcorn_libs="crt1.o libc.a libmigrate.a libstack-transform.a libelf.a libc.a libpthread.a"
+x86_popcorn_libs=$(echo "$popcorn_libs" | sed "s/[^ ]* */${lib_popcorn_path_escaped}\/x86_64\/lib\/&/g")
+arm_popcorn_libs=$(echo "$popcorn_libs" | sed "s/[^ ]* */${lib_popcorn_path_escaped}\/aarch64\/lib\/&/g")
+
+x86_enclave_objs="
     ${lib_build_path}/x86_64/stub.o
     ${lib_build_path}/x86_64/ocall_syscall.o
     ${lib_build_path}/x86_64/trampo.o
@@ -26,17 +31,10 @@ x86_objs="
     ${lib_build_path}/x86_64/ocall_libcall_wrapper.o
     ${lib_build_path}/x86_64/ocall_syscall_wrapper.o
     ${lib_build_path}/x86_64/migration.o
-    $popcorn_path/x86_64/lib/crt1.o
-    $popcorn_path/x86_64/lib/libc.a
-    $popcorn_path/x86_64/lib/libmigrate.a
-    $popcorn_path/x86_64/lib/libstack-transform.a
-    $popcorn_path/x86_64/lib/libelf.a
-    $popcorn_path/x86_64/lib/libc.a
-    $popcorn_path/x86_64/lib/libpthread.a
 "
 
 
-arm_objs="
+arm_enclave_objs="
     ${lib_build_path}/aarch64/stub.o
     ${lib_build_path}/aarch64/ocall_syscall.o
     ${lib_build_path}/aarch64/trampo.o
@@ -47,14 +45,10 @@ arm_objs="
     ${lib_build_path}/aarch64/ocall_libcall_wrapper.o
     ${lib_build_path}/aarch64/ocall_syscall_wrapper.o
     ${lib_build_path}/aarch64/migration.o
-    $popcorn_path/aarch64/lib/crt1.o
-    $popcorn_path/aarch64/lib/libc.a
-    $popcorn_path/aarch64/lib/libmigrate.a
-    $popcorn_path/aarch64/lib/libstack-transform.a
-    $popcorn_path/aarch64/lib/libelf.a
-    $popcorn_path/aarch64/lib/libc.a
-    $popcorn_path/aarch64/lib/libpthread.a
 "
+
+x86_objs="$x86_enclave_objs $x86_popcorn_libs"
+arm_objs="$arm_enclave_objs $arm_popcorn_libs"
 
 
 build() {
@@ -62,7 +56,7 @@ build() {
     make -C ../libs
 
     # Generate *.o
-    $popcorn_bin/clang $CFLAGS -O2 -popcorn-migratable -c ${APP}.c
+    $popcorn_bin/clang $CFLAGS -popcorn-migratable -c ${APP}.c
 
     echo "Link (1/2) generate map files"
     # Generate map.txt
@@ -102,6 +96,16 @@ build() {
     $popcorn_bin/gen-stackinfo -f final_${APP}_x86_64
 
     echo "Done"
+}
+
+nm() {
+	make -C ../libs
+	$popcorn_bin/clang $CFLAGS -DNO_MIGRATION -c ${APP}.c -o main_x86_64.o
+    $popcorn_bin/ld.gold -L/usr/lib/gcc/x86_64-linux-gnu/5 \
+            -T ${lib_build_path}/x86_64/linker.lds \
+            -o ${APP}_nm_x86_64 \
+            $x86_enclave_objs $popcorn_path/x86_64/lib/libc.a \
+            --start-group -lgcc -lgcc_eh --end-group
 }
 
 clean() {

@@ -15,8 +15,8 @@
 #define CONTROL
 #include "ks_imp_includes.h"	/* definitions files and prototypes */
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/milc_aarch64";
+char *x86_64_fn  = "./enclave/milc_x86_64";
 
 EXTERN  gauge_header start_lat_hdr;     /* Input gauge field header */
 
@@ -40,6 +40,8 @@ int main( int argc, char **argv ){
             update();
 	}
 	node0_printf("WARMUPS COMPLETED\n"); fflush(stdout);
+
+#ifndef NO_MIGRATION
     printf("[yfzm] [before] lattice: %p, &lattice: %p\n", lattice, &lattice);
 
     printf("Maybe migrate now! You have 10 seconds!\n");
@@ -47,6 +49,7 @@ int main( int argc, char **argv ){
     check_migrate(1, 0);
 
     printf("[yfzm] [after ] lattice: %p, &lattice: %p\n", lattice, &lattice);
+#endif
 
 	/* perform measuring trajectories, reunitarizing and measuring 	*/
 	meascount=0;		/* number of measurements 		*/
