@@ -46,6 +46,9 @@ vedis: libs
 mvedis: libs
 	make -C mvedis
 
+h264ref: libs
+	make -C h264ref
+
 clean:
 	make -C libs clean
 	make -C helloworld clean
@@ -62,6 +65,7 @@ clean:
 	make -C hmmer clean
 	make -C vedis clean
 	make -C mvedis clean
+	make -C h264ref clean
 
 .PHONY: all clean libs helloworld kvstore filedemo multithread bzip2 \
-	perlbench mcf milc lbm libquantum sjeng hmmer vedis mvedis
+	perlbench mcf milc lbm libquantum sjeng hmmer vedis mvedis h264ref
