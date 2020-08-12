@@ -15,8 +15,8 @@
 
 extern int migration_flag;
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/helloworld_aarch64";
+char *x86_64_fn  = "./enclave/helloworld_x86_64";
 
 int main(int argc, char* argv[])
 {
