@@ -41,6 +41,9 @@
 #include "specrand.h"
 #endif /* SPEC_CPU */
 
+char *aarch64_fn = "./enclave/libquantum_aarch64";
+char *x86_64_fn  = "./enclave/libquantum_x86_64";
+
 int main(int argc, char **argv) {
 
   quantum_reg qr;
@@ -91,25 +94,24 @@ int main(int argc, char **argv) {
   printf("Random seed: %i\n", x);
 
   qr=quantum_new_qureg(0, width);
-  printf("[yfzm] qr_init: %p (& = %p)\n", qr, &qr);
 
   for(i=0;i<width;i++)
     quantum_hadamard(i, &qr);
 
-  printf("[yfzm] qr[1]: %p (& = %p)\n", qr, &qr);
   quantum_addscratch(3*swidth+2, &qr);
 
-  printf("[yfzm] qr[2]: %p (& = %p)\n", qr, &qr);
   quantum_exp_mod_n(N, x, width, swidth, &qr);
 
-  printf("[yfzm] qr[3]: %p (& = %p)\n", qr, &qr);
   for(i=0;i<3*swidth+2;i++)
     {
       quantum_bmeasure(0, &qr);
     }
 
-  printf("[yfzm] qr[4]: %p (& = %p)\n", qr, &qr);
   quantum_qft(width, &qr); 
+
+  printf("TEN seconds for migration\n");
+  sleep(10);
+  check_migrate(1, 0);
   
   for(i=0; i<width/2; i++)
     {
@@ -118,7 +120,6 @@ int main(int argc, char **argv) {
       quantum_cnot(i, width-i-1, &qr);
     }
   
-  printf("[yfzm] qr[5]: %p (& = %p)\n", qr, &qr);
   c=quantum_measure(qr);
 
   if(c==-1)

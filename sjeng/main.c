@@ -82,8 +82,8 @@ int book_ply;
 int use_book;
 char opening_history[STR_BUFF];
 
-char *aarch64_fn = "./enclave/enclave_aarch64";
-char *x86_64_fn  = "./enclave/enclave_x86_64";
+char *aarch64_fn = "./enclave/sjeng_aarch64";
+char *x86_64_fn  = "./enclave/sjeng_x86_64";
 int is_migrated = 0;
 void check_migrate(void (*callback)(void *), void *callback_data);
 
@@ -184,9 +184,8 @@ void output_gloabl_vars() {
 void run_autotest(char *testset)
 {
 	printf("testset(%p): %s\n", testset, testset);
-	printf("Maybe migrate now? 10s countdown...\n");
-	sleep(10);
-	check_migrate(0, 0);
+	//printf("Maybe migrate now? 10s countdown...\n");
+	//sleep(10);
 
 	int testsuite;
 	//FILE *testsuite;
@@ -205,6 +204,11 @@ void run_autotest(char *testset)
     unsigned char c;
 	int index = 0;
 	while (read(testsuite, &c, 1) != 0) {
+
+#ifndef NO_MIGRATION
+	check_migrate(1, 0);
+#endif
+
 		if (c != '\n') {
 			readbuff[index] = c;
 			++index;
